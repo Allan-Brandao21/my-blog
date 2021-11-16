@@ -1,0 +1,54 @@
+.post{
+    background-color:white;
+    width: 100vw;
+    max-width: 930px;
+    margin: 20px auto;
+    border-radius: 12px;
+    padding: 10px 70px 15px 70px;
+    font-family: 'Lato', 'Arial', sans-serif;
+    box-shadow: 0px 0px 12px 6px #0003;
+}
+
+.post p{ 
+    font-size: 22px;
+    
+}
+.post ul, .post ol{
+    font-size: 18px;
+}
+
+.post li{
+    padding-bottom: 10px;
+}
+
+.post h1{
+    font-size: 40px;
+    padding-bottom: 20px;
+}
+.post img{
+    max-width: 100%;
+}
+
+@media only screen and (max-width: 900px) {
+    .post {
+        padding: 10px 30px 15px 30px;
+        margin: 0 auto;
+    }
+
+    .post p{ 
+        font-size: 20px;
+        
+    }
+    .post ul, .post ol{
+        font-size: 18px;
+    }
+    
+
+    .post h1{
+        font-size: 30px;
+        padding-bottom: 20px;
+    }
+    .post li{
+        padding-bottom: 20px;
+    }
+ }
