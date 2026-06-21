@@ -2,3 +2,7 @@
 scrape.log
 *.tmp
 nohup.out
+
+tbca_checkpoint.json
+tbca.json
+tbca.xlsx
