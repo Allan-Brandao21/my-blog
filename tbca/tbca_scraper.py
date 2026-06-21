@@ -159,16 +159,21 @@ def build_catalog():
 
 # ---------------------------- FASE 2: DETALHES ------------------------------
 def parse_detail(html):
-    """Le a tabela de nutrientes. Retorna (nutrientes_dict, n_linhas, descricao_pagina)."""
+    """Le a tabela de nutrientes.
+    Retorna (nutrientes, medidas, n_rows):
+      nutrientes = {"Componente (unid)": valor_por_100g}
+      medidas    = [{"medida": <nome porcao>, "valores": {"Componente (unid)": valor}}, ...]
+    """
     soup = BeautifulSoup(html, "lxml")
     table = soup.find("table", class_="display") or soup.find("table")
     nutrientes = {}
+    medidas = []
     n_rows = 0
     if not table:
-        return nutrientes, 0, ""
+        return nutrientes, medidas, 0
     rows = table.find_all("tr")
     if not rows:
-        return nutrientes, 0, ""
+        return nutrientes, medidas, 0
     header = [c.get_text(strip=True) for c in rows[0].find_all(["th", "td"])]
     # localiza a coluna "Valor por 100g" de forma robusta
     val_idx = 2
@@ -176,6 +181,9 @@ def parse_detail(html):
         if "100g" in h.replace(" ", "").lower() or "100 g" in h.lower():
             val_idx = i
             break
+    # colunas de medidas caseiras = tudo apos "Valor por 100g"
+    measure_names = header[val_idx + 1:]
+    medidas_valores = [dict() for _ in measure_names]
     for tr in rows[1:]:
         cells = tr.find_all(["td", "th"])
         if len(cells) <= val_idx:
@@ -190,8 +198,16 @@ def parse_detail(html):
         if key in nutrientes:
             key = f"{componente} ({unidade}) [{n_rows}]"
         nutrientes[key] = valor
+        # valores das medidas caseiras para este componente
+        for j, _ in enumerate(measure_names):
+            ci = val_idx + 1 + j
+            if ci < len(cells):
+                medidas_valores[j][key] = cells[ci].get_text(strip=True)
         n_rows += 1
-    return nutrientes, n_rows, ""
+    for name, vals in zip(measure_names, medidas_valores):
+        if name:
+            medidas.append({"medida": name, "valores": vals})
+    return nutrientes, medidas, n_rows
 
 
 def git_commit(msg):
@@ -240,12 +256,12 @@ def scrape(catalog, limit=None):
         cod = item["codigo"]
         try:
             html = fetch(item["href"])
-            nutrientes, n_rows, _ = parse_detail(html)
+            nutrientes, medidas, n_rows = parse_detail(html)
             if n_rows == 0:
                 failures.append(cod)
                 log(f"  [{i}/{len(pending)}] {cod}: 0 nutrientes (FALHA)")
             else:
-                log(f"  [{i}/{len(pending)}] {cod}: {n_rows} nutrientes")
+                log(f"  [{i}/{len(pending)}] {cod}: {n_rows} nutrientes, {len(medidas)} medidas")
             results[cod] = {
                 "codigo": cod,
                 "descricao": item["descricao"],
@@ -253,6 +269,7 @@ def scrape(catalog, limit=None):
                 "grupo": item.get("grupo", ""),
                 "marca": item.get("marca", ""),
                 "nutrientes": nutrientes,
+                "medidas_caseiras": medidas,
             }
         except Exception as e:
             failures.append(cod)
@@ -289,7 +306,7 @@ def write_outputs(results):
                 nutrient_cols.append(k)
     wb = Workbook()
     ws = wb.active
-    ws.title = "TBCA"
+    ws.title = "Por_100g"
     base_cols = ["codigo", "descricao", "nome_cientifico", "grupo", "marca"]
     ws.append(base_cols + nutrient_cols)
     for it in items:
@@ -298,8 +315,20 @@ def write_outputs(results):
         nut = it["nutrientes"]
         row += [nut.get(c, "") for c in nutrient_cols]
         ws.append(row)
+
+    # Aba 2: medidas caseiras em formato longo (escalavel)
+    ws2 = wb.create_sheet("Medidas_Caseiras")
+    ws2.append(["codigo", "descricao", "medida", "componente_unidade", "valor"])
+    n_med = 0
+    for it in items:
+        for med in it.get("medidas_caseiras", []):
+            nome = med["medida"]
+            for comp, val in med["valores"].items():
+                ws2.append([it["codigo"], it["descricao"], nome, comp, val])
+                n_med += 1
     wb.save(XLSX_OUT)
-    log(f"tbca.xlsx salvo: {len(items)} linhas, {len(nutrient_cols)} colunas de nutrientes")
+    log(f"tbca.xlsx salvo: aba Por_100g={len(items)} linhas x {len(nutrient_cols)} nutrientes; "
+        f"aba Medidas_Caseiras={n_med} linhas")
     return len(items), len(nutrient_cols), nutrient_cols
 
 
