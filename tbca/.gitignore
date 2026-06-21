@@ -1,0 +1,4 @@
+*.html
+scrape.log
+*.tmp
+nohup.out
