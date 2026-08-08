@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lâmpada — Um caminho pela Palavra</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root{
+    --bg:#151126;
+    --bg2:#1E1836;
+    --card:#251E42;
+    --card2:#2C2450;
+    --line:#3A3163;
+    --text:#F2EBDB;
+    --muted:#A89FC7;
+    --dim:#6E6693;
+    --flame:#FFB13D;
+    --flame2:#F07E2E;
+    --gold:#E9C46A;
+    --gold-soft:rgba(233,196,106,.14);
+    --flame-soft:rgba(255,177,61,.12);
+    --danger:#E77;
+    --radius:18px;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+    --font-display:"Fraunces", Georgia, "Times New Roman", serif;
+    --font-body:"Atkinson Hyperlegible", -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #2A2150 0%, transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    font-size:17px;
+    line-height:1.55;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:680px; margin:0 auto; padding:20px 16px 90px;}
+
+  /* ---------- Header ---------- */
+  header{ text-align:center; padding:18px 0 6px; }
+  .brand{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:34px;
+    letter-spacing:.5px;
+  }
+  .brand em{ color:var(--flame); font-style:normal; }
+  .tagline{
+    color:var(--muted);
+    font-size:14px;
+    font-family:var(--font-display);
+    font-style:italic;
+    margin-top:2px;
+  }
+
+  /* ---------- Flame (assinatura) ---------- */
+  .flame-stage{ display:flex; flex-direction:column; align-items:center; margin:14px 0 4px; }
+  .flame-holder{ position:relative; width:96px; height:110px; display:flex; align-items:flex-end; justify-content:center; }
+  .flame-glow{
+    position:absolute; inset:auto 0 6px 0; margin:auto;
+    width:80px; height:80px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,177,61,.35) 0%, transparent 70%);
+    transition:transform .8s ease, opacity .8s ease;
+  }
+  .flame-svg{ position:relative; transition:transform .8s ease; transform-origin:50% 90%; }
+  @keyframes flicker{
+    0%,100%{ transform:scale(1) rotate(-1deg); }
+    30%{ transform:scale(1.04) rotate(1.2deg); }
+    60%{ transform:scale(.97) rotate(-.6deg); }
+  }
+  .flame-svg .inner-flame{ animation:flicker 2.6s ease-in-out infinite; transform-origin:50% 95%; }
+  .flame-label{ font-size:14px; color:var(--muted); margin-top:2px; }
+  .flame-label b{ color:var(--flame); font-weight:700; }
+  .week-dots{ display:flex; gap:6px; margin-top:8px; }
+  .week-dots span{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--line); transition:background .3s;
+  }
+  .week-dots span.on{ background:var(--flame); box-shadow:0 0 8px rgba(255,177,61,.6); }
+  .week-hint{ font-size:12.5px; color:var(--dim); margin-top:5px; }
+
+  /* ---------- XP / nível ---------- */
+  .level-card{ background:var(--bg2); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; margin-top:16px; }
+  .level-top{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .level-title{ font-family:var(--font-display); font-size:19px; font-weight:600; }
+  .level-title small{ color:var(--muted); font-family:var(--font-body); font-size:13px; font-weight:400; margin-left:6px;}
+  .xp-num{ color:var(--gold); font-weight:700; font-size:14px; }
+  .xp-bar{ height:10px; background:var(--line); border-radius:99px; margin-top:10px; overflow:hidden; }
+  .xp-fill{ height:100%; background:linear-gradient(90deg, var(--flame2), var(--flame), var(--gold)); border-radius:99px; width:0%; transition:width .9s cubic-bezier(.2,.8,.2,1); }
+  .xp-next{ font-size:12.5px; color:var(--dim); margin-top:7px; }
+
+  /* ---------- Bússola de ritmo ---------- */
+  .compass{ background:var(--bg2); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; margin-top:12px; }
+  .compass h3{ font-family:var(--font-display); font-size:16px; font-weight:600; color:var(--muted); letter-spacing:.4px; text-transform:uppercase; font-size:12.5px; }
+  .compass-status{ font-family:var(--font-display); font-size:21px; font-weight:600; margin-top:6px; }
+  .compass-status.ok{ color:var(--gold); }
+  .compass-status.ahead{ color:var(--flame); }
+  .compass-status.behind{ color:#F2A6A6; }
+  .compass p{ font-size:14.5px; color:var(--muted); margin-top:6px; }
+  .compass .stats{ display:flex; gap:14px; margin-top:12px; flex-wrap:wrap; }
+  .stat{ flex:1; min-width:110px; background:var(--card); border-radius:12px; padding:10px 12px; text-align:center; }
+  .stat b{ display:block; font-size:20px; color:var(--text); font-family:var(--font-display); }
+  .stat span{ font-size:12px; color:var(--dim); }
+  .milestone{ margin-top:12px; font-size:14px; background:var(--flame-soft); border:1px dashed rgba(255,177,61,.4); border-radius:12px; padding:9px 12px; color:var(--text); }
+  .milestone b{ color:var(--flame); }
+
+  /* ---------- Continuar ---------- */
+  .continue-card{
+    margin-top:18px;
+    background:linear-gradient(135deg, #33265E, #251E42);
+    border:1px solid rgba(255,177,61,.45);
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .continue-card:active{ transform:scale(.985); }
+  .continue-eyebrow{ font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--flame); font-weight:700; }
+  .continue-title{ font-family:var(--font-display); font-size:23px; font-weight:700; margin-top:4px; }
+  .continue-meta{ font-size:14px; color:var(--muted); margin-top:4px; }
+  .continue-btn{
+    margin-top:14px; display:inline-block;
+    background:linear-gradient(90deg, var(--flame2), var(--flame));
+    color:#241A08; font-weight:700; font-size:15.5px;
+    padding:11px 22px; border-radius:99px; border:none;
+  }
+
+  /* ---------- Trilha ---------- */
+  .trail{ margin-top:30px; }
+  .jornada{ margin-bottom:8px; }
+  .jornada-head{
+    display:flex; align-items:center; gap:12px;
+    padding:14px 6px; cursor:pointer; user-select:none;
+  }
+  .jornada-num{
+    width:38px; height:38px; flex:none; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; font-size:16px;
+    background:var(--card); border:1.5px solid var(--line); color:var(--muted);
+  }
+  .jornada.done .jornada-num{ background:var(--gold-soft); border-color:var(--gold); color:var(--gold); }
+  .jornada.active .jornada-num{ border-color:var(--flame); color:var(--flame); box-shadow:0 0 12px rgba(255,177,61,.35); }
+  .jornada-info{ flex:1; }
+  .jornada-name{ font-family:var(--font-display); font-size:20px; font-weight:600; }
+  .jornada-sub{ font-size:13.5px; color:var(--muted); }
+  .jornada-prog{ font-size:13px; color:var(--dim); white-space:nowrap; }
+  .jornada.done .jornada-prog{ color:var(--gold); }
+  .chev{ color:var(--dim); transition:transform .25s; font-size:13px; }
+  .jornada.open .chev{ transform:rotate(90deg); }
+  .etapas{ display:none; padding-left:18px; border-left:2px solid var(--line); margin-left:18px; }
+  .jornada.open .etapas{ display:block; }
+
+  .etapa{
+    position:relative;
+    background:var(--card); border:1px solid var(--line);
+    border-radius:14px; padding:13px 14px; margin:10px 0 10px 14px;
+    cursor:pointer; transition:border-color .2s, transform .12s;
+  }
+  .etapa::before{
+    content:""; position:absolute; left:-24px; top:20px;
+    width:12px; height:12px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--line);
+  }
+  .etapa:active{ transform:scale(.99); }
+  .etapa .et-title{ font-weight:700; font-size:16.5px; }
+  .etapa .et-ref{ font-size:13.5px; color:var(--flame); margin-top:2px; }
+  .etapa .et-meta{ font-size:12.5px; color:var(--dim); margin-top:4px; }
+  .etapa.done{ border-color:rgba(233,196,106,.5); }
+  .etapa.done::before{ background:var(--gold); border-color:var(--gold); }
+  .etapa.done .et-title{ color:var(--gold); }
+  .etapa.next{ border-color:var(--flame); box-shadow:0 0 14px rgba(255,177,61,.18); }
+  .etapa.next::before{ background:var(--flame); border-color:var(--flame); box-shadow:0 0 8px rgba(255,177,61,.7); }
+  .etapa.locked{ opacity:.45; cursor:default; }
+  .badge-done{ font-size:12px; color:var(--gold); font-weight:700; }
+
+  /* ---------- Conquistas ---------- */
+  .section-title{ font-family:var(--font-display); font-size:22px; font-weight:600; margin:34px 0 4px; }
+  .section-sub{ color:var(--muted); font-size:14px; margin-bottom:14px; }
+  .badges{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; }
+  .badge{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:12px; text-align:center; opacity:.42; filter:grayscale(.6);
+  }
+  .badge.earned{ opacity:1; filter:none; border-color:rgba(233,196,106,.55); background:linear-gradient(180deg, rgba(233,196,106,.08), var(--card)); }
+  .badge .b-ico{ font-size:26px; }
+  .badge .b-name{ font-weight:700; font-size:13.5px; margin-top:5px; }
+  .badge .b-desc{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+
+  /* ---------- Pérolas ---------- */
+  .pearls-count{ color:var(--gold); font-weight:700; }
+  .pearl-list{ display:flex; flex-direction:column; gap:8px; }
+  .pearl-item{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:11px 13px; font-size:14.5px; }
+  .pearl-item b{ color:var(--gold); font-family:var(--font-display); }
+
+  /* ---------- Modal etapa ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(10,8,20,.75);
+    display:none; align-items:flex-end; justify-content:center; z-index:50;
+    backdrop-filter:blur(3px);
+  }
+  .overlay.show{ display:flex; }
+  .sheet{
+    background:var(--bg2); width:100%; max-width:680px;
+    max-height:92vh; overflow-y:auto;
+    border-radius:22px 22px 0 0; padding:20px 20px 40px;
+    border-top:1px solid var(--line);
+    animation:rise .3s ease;
+  }
+  @keyframes rise{ from{ transform:translateY(40px); opacity:0;} to{ transform:none; opacity:1;} }
+  .sheet-close{
+    float:right; background:var(--card); border:1px solid var(--line); color:var(--muted);
+    width:34px; height:34px; border-radius:50%; font-size:16px; cursor:pointer;
+  }
+  .sheet-eyebrow{ font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--flame); font-weight:700; }
+  .sheet h2{ font-family:var(--font-display); font-size:26px; font-weight:700; margin-top:4px; line-height:1.2; }
+  .sheet .sheet-ref{ color:var(--gold); font-size:15px; margin-top:4px; font-weight:700; }
+  .sheet .sheet-time{ color:var(--dim); font-size:13px; margin-top:2px; }
+  .block{ margin-top:18px; }
+  .block h4{
+    font-size:12.5px; letter-spacing:1.2px; text-transform:uppercase;
+    color:var(--muted); font-weight:700; margin-bottom:6px;
+  }
+  .block p{ font-size:16px; }
+  .foco-box{ background:var(--flame-soft); border-left:3px solid var(--flame); border-radius:0 12px 12px 0; padding:12px 14px; font-size:15.5px; }
+  .read-link{
+    display:block; text-align:center; margin-top:16px;
+    background:var(--card2); border:1px solid var(--line); border-radius:14px;
+    padding:13px; color:var(--text); text-decoration:none; font-weight:700; font-size:15.5px;
+  }
+  .read-link span{ color:var(--flame); }
+  .divider-after{ display:flex; align-items:center; gap:10px; margin:24px 0 4px; color:var(--dim); font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+  .divider-after::before, .divider-after::after{ content:""; flex:1; height:1px; background:var(--line); }
+  textarea.note{
+    width:100%; background:var(--card); border:1px solid var(--line); border-radius:12px;
+    color:var(--text); font-family:var(--font-body); font-size:15px; padding:11px; min-height:74px; resize:vertical;
+  }
+  textarea.note:focus{ outline:2px solid var(--flame); border-color:transparent; }
+  .quiz-opts{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+  .quiz-opt{
+    text-align:left; background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:11px 13px; color:var(--text); font-size:15px; cursor:pointer; font-family:var(--font-body);
+    transition:border-color .15s;
+  }
+  .quiz-opt:hover{ border-color:var(--flame); }
+  .quiz-opt.right{ border-color:var(--gold); background:var(--gold-soft); }
+  .quiz-opt.wrong{ border-color:var(--danger); opacity:.7; }
+  .quiz-feedback{ font-size:14px; margin-top:8px; color:var(--muted); }
+  .btn-complete{
+    width:100%; margin-top:24px;
+    background:linear-gradient(90deg, var(--flame2), var(--flame));
+    color:#241A08; font-weight:800; font-size:17px; font-family:var(--font-body);
+    padding:15px; border-radius:99px; border:none; cursor:pointer;
+    transition:transform .12s;
+  }
+  .btn-complete:active{ transform:scale(.98); }
+  .btn-secondary{
+    width:100%; margin-top:10px; background:transparent; border:1px solid var(--line);
+    color:var(--muted); padding:12px; border-radius:99px; font-size:15px; cursor:pointer; font-family:var(--font-body);
+  }
+  .done-stamp{ text-align:center; color:var(--gold); font-weight:700; margin-top:20px; font-size:15px; }
+
+  /* ---------- Celebração ---------- */
+  .celebrate{ text-align:center; padding:12px 4px; }
+  .celebrate .big{ font-size:52px; }
+  .celebrate h2{ font-family:var(--font-display); font-size:28px; margin-top:6px; }
+  .celebrate .xp-gain{ color:var(--gold); font-weight:800; font-size:19px; margin-top:8px; }
+  .celebrate .mana{ color:var(--flame); font-weight:800; font-size:16px; margin-top:4px; }
+  .pearl-card{
+    margin-top:18px; background:linear-gradient(135deg, rgba(233,196,106,.13), var(--card));
+    border:1px solid rgba(233,196,106,.5); border-radius:16px; padding:16px; text-align:left;
+  }
+  .pearl-card h4{ color:var(--gold); font-family:var(--font-display); font-size:16px; margin-bottom:5px; }
+  .pearl-card p{ font-size:15px; }
+  .badge-toast{ margin-top:12px; background:var(--flame-soft); border:1px solid rgba(255,177,61,.5); border-radius:14px; padding:12px; font-size:15px; }
+  .badge-toast b{ color:var(--flame); }
+
+  .confetti-piece{
+    position:fixed; top:-12px; width:9px; height:14px; z-index:99; pointer-events:none;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform:translateY(105vh) rotate(720deg); opacity:.8; }
+  }
+
+  /* ---------- Onboarding ---------- */
+  .onb .sheet{ border-radius:22px; margin:auto; max-height:88vh; }
+  .onb-item{ display:flex; gap:12px; margin-top:16px; align-items:flex-start; }
+  .onb-item .ico{ font-size:22px; flex:none; margin-top:1px; }
+  .onb-item p{ font-size:15px; color:var(--text); }
+  .onb-item p b{ color:var(--flame); }
+  .verse{ font-family:var(--font-display); font-style:italic; color:var(--muted); text-align:center; font-size:15px; margin-top:20px; }
+
+  footer{ text-align:center; margin-top:44px; color:var(--dim); font-size:13px; }
+  .save-ok{ font-size:12px; color:#7fbf8f; margin-bottom:12px; }
+  .save-warn{ font-size:12px; color:#FFB13D; margin-bottom:12px; line-height:1.5;
+    background:rgba(255,177,61,.08); border:1px solid rgba(255,177,61,.25);
+    border-radius:12px; padding:10px 14px; text-align:left; }
+  .backup-row{ display:flex; gap:10px; justify-content:center; margin-bottom:18px; flex-wrap:wrap; }
+  .backup-btn{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12);
+    color:var(--dim); font-family:inherit; font-size:12px; padding:8px 14px;
+    border-radius:999px; cursor:pointer; transition:.2s; }
+  .backup-btn:hover{ color:#fff; border-color:rgba(255,177,61,.5); }
+  .sync-panel{ display:none; max-width:420px; margin:0 auto 20px; text-align:left;
+    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.1);
+    border-radius:16px; padding:16px; }
+  .sync-help{ font-size:12px; color:var(--dim); margin:0 0 12px; line-height:1.5; }
+  .sync-input{ width:100%; box-sizing:border-box; background:rgba(0,0,0,.3);
+    border:1px solid rgba(255,255,255,.12); border-radius:10px; color:#fff;
+    font-family:inherit; font-size:13px; padding:10px 12px; margin-bottom:8px; }
+  .sync-input:focus{ outline:none; border-color:rgba(255,177,61,.6); }
+  select.sync-input{ appearance:none; cursor:pointer; }
+  select.sync-input option{ background:#221c3d; color:#fff; }
+  .sync-label{ display:block; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--dim); margin:2px 0 5px; }
+  .sync-note{ font-size:11.5px; color:var(--dim); line-height:1.5; margin:2px 0 12px; }
+  .sync-note b{ color:var(--flame); }
+  .sync-result{ font-size:12px; line-height:1.5; margin:10px 0 0; word-break:break-word; }
+  .sync-result.ok{ color:#7fbf8f; }
+  .sync-result.bad{ color:#FFB13D; }
+  .save-err{ font-size:12px; color:#FFB13D; margin-bottom:12px; line-height:1.5; }
+  .reset-link{ background:none; border:none; color:var(--dim); text-decoration:underline; cursor:pointer; font-size:12.5px; margin-top:8px; font-family:var(--font-body); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+  @media (min-width:700px){
+    .overlay{ align-items:center; }
+    .sheet{ border-radius:22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Lâm<em>pada</em></div>
+    <div class="tagline">“Lâmpada para os meus pés é a tua palavra” — Sl 119.105</div>
+  </header>
+
+  <div class="flame-stage">
+    <div class="flame-holder">
+      <div class="flame-glow" id="flameGlow"></div>
+      <svg class="flame-svg" id="flameSvg" width="70" height="92" viewBox="0 0 70 92">
+        <g class="inner-flame">
+          <path id="flameOuter" d="M35 6 C46 24 58 34 58 54 C58 72 48 84 35 84 C22 84 12 72 12 54 C12 34 24 24 35 6 Z" fill="#F07E2E"/>
+          <path id="flameMid" d="M35 26 C42 37 50 44 50 57 C50 70 43 78 35 78 C27 78 20 70 20 57 C20 44 28 37 35 26 Z" fill="#FFB13D"/>
+          <path id="flameCore" d="M35 44 C39 50 43 54 43 62 C43 70 39 74 35 74 C31 74 27 70 27 62 C27 54 31 50 35 44 Z" fill="#FFE9B8"/>
+        </g>
+        <rect x="27" y="82" width="16" height="6" rx="3" fill="#3A3163"/>
+      </svg>
+    </div>
+    <div class="flame-label" id="flameLabel"></div>
+    <div class="week-dots" id="weekDots" title="Etapas nos últimos 7 dias"></div>
+    <div class="week-hint">chama da semana · meta viva: 5 etapas a cada 7 dias</div>
+  </div>
+
+  <div class="level-card">
+    <div class="level-top">
+      <div class="level-title" id="levelTitle"></div>
+      <div class="xp-num" id="xpNum"></div>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+    <div class="xp-next" id="xpNext"></div>
+  </div>
+
+  <div class="compass">
+    <h3>Bússola do trimestre</h3>
+    <div class="compass-status" id="compassStatus"></div>
+    <p id="compassMsg"></p>
+    <div class="stats">
+      <div class="stat"><b id="statDays">–</b><span>dias no caminho</span></div>
+      <div class="stat"><b id="statDone">–</b><span>etapas de 60</span></div>
+      <div class="stat"><b id="statLeft">–</b><span>dias restantes</span></div>
+    </div>
+    <div class="milestone" id="milestone"></div>
+  </div>
+
+  <div class="continue-card" id="continueCard" role="button" tabindex="0"></div>
+
+  <div class="trail">
+    <div class="section-title">A Trilha</div>
+    <div class="section-sub">6 jornadas · 60 etapas · só histórias, no seu ritmo. A próxima etapa acende quando você conclui a anterior.</div>
+    <div id="trailList"></div>
+  </div>
+
+  <div class="section-title">Conquistas</div>
+  <div class="section-sub" id="badgeSub"></div>
+  <div class="badges" id="badgeGrid"></div>
+
+  <div class="section-title">Pérolas encontradas</div>
+  <div class="section-sub">Cada etapa concluída revela uma curiosidade escondida no texto. <span class="pearls-count" id="pearlCount"></span></div>
+  <div class="pearl-list" id="pearlList"></div>
+
+  <footer>
+    <div id="saveState" class="save-ok">✓ Progresso salvo neste navegador</div>
+    <div class="backup-row">
+      <button class="backup-btn" id="exportBtn">↓ Baixar backup</button>
+      <button class="backup-btn" id="importBtn">↑ Restaurar backup</button>
+      <button class="backup-btn" id="syncBtn">☁️ Sincronizar</button>
+    </div>
+    <div class="sync-panel" id="syncPanel">
+      <p class="sync-help">Escolha onde o progresso fica guardado para acompanhar você entre o celular e o computador. A configuração fica salva só neste aparelho.</p>
+      <label class="sync-label" for="syncBackend">Onde salvar</label>
+      <select class="sync-input" id="syncBackend"></select>
+      <div id="syncFields"></div>
+      <p class="sync-note" id="syncNote"></p>
+      <div class="backup-row" style="margin:0">
+        <button class="backup-btn" id="syncSaveBtn">Conectar e sincronizar</button>
+        <button class="backup-btn" id="syncTestBtn">Testar conexão</button>
+      </div>
+      <p class="sync-result" id="syncResult"></p>
+    </div>
+    Feito para caminhar sem culpa e sem pressa — mas sem parar.<br>
+    <button class="reset-link" id="resetBtn">reiniciar o plano do zero</button>
+  </footer>
+</div>
+
+<!-- Modal etapa -->
+<div class="overlay" id="etapaOverlay">
+  <div class="sheet" id="etapaSheet"></div>
+</div>
+
+<!-- Onboarding -->
+<div class="overlay onb" id="onbOverlay">
+  <div class="sheet" id="onbSheet"></div>
+</div>
+
+<script>
+/* =========================================================
+   DADOS — 6 jornadas, 60 etapas de leitura narrativa
+   ========================================================= */
+const BIBLE_URL = "https://www.bibliaonline.com.br/nvi/";
+
+const JORNADAS = [
+  { n:"Origens", livro:"Gênesis", d:"Criação, promessa e uma família bem complicada — as histórias que fundam tudo." },
+  { n:"Libertação", livro:"Êxodo", d:"Um povo escravizado, um líder relutante e o maior resgate do Antigo Testamento." },
+  { n:"Coragem", livro:"Rute · Jonas · Daniel · Ester", d:"Histórias curtas e intensas de gente comum em situações impossíveis." },
+  { n:"O Coração de um Rei", livro:"1–2 Samuel · Salmos", d:"A saga de Davi: pastor, gigante, trono, queda e recomeço." },
+  { n:"Jesus", livro:"Evangelho de Marcos", d:"O evangelho mais curto e acelerado: Jesus em ação, cena após cena." },
+  { n:"Fogo que se Espalha", livro:"Atos", d:"O que aconteceu depois: uma fé que sai de uma sala e alcança o mundo." }
+];
+
+const ETAPAS = [
+/* ---------- JORNADA 1 · ORIGENS (Gênesis) ---------- */
+{ j:0, t:"No princípio", ref:"Gênesis 1–2", link:"gn/1", min:12,
+  ctx:"A Bíblia abre com um poema em ritmo de refrão: sete dias, ordem nascendo do caos, e tudo culminando na criação do ser humano.",
+  foco:"Repare quantas vezes aparece a frase “e Deus viu que era bom”. O texto quer que você sinta isso.",
+  reflex:"O que significa, para a sua semana, a ideia de que o descanso foi criado antes de qualquer trabalho humano?",
+  quiz:{ q:"O que Deus faz no sétimo dia?", o:["Cria os animais","Descansa e abençoa o dia","Planta o jardim do Éden"], a:1 },
+  pearl:"Gênesis 1 é estruturado como poesia hebraica: os dias 1–3 criam os espaços (luz, céu, terra) e os dias 4–6 preenchem cada um deles, na mesma ordem." },
+
+{ j:0, t:"A queda e o primeiro crime", ref:"Gênesis 3–4", link:"gn/3", min:11,
+  ctx:"Duas cenas em sequência: a serpente no jardim e, logo depois, dois irmãos e o primeiro assassinato da história.",
+  foco:"Observe as perguntas que Deus faz. Ele sabe as respostas — as perguntas são convites.",
+  reflex:"Quando algo dá errado, sua primeira reação parece mais com a de Adão (culpar alguém) ou com a de Caim (se fechar)?",
+  quiz:{ q:"Qual é a primeira pergunta que Deus faz ao ser humano?", o:["“O que você fez?”","“Onde está você?”","“Quem te contou isso?”"], a:1 },
+  pearl:"Mesmo após a queda, Deus mesmo costura roupas para Adão e Eva antes de eles saírem do jardim — o primeiro gesto de cuidado depois do primeiro erro." },
+
+{ j:0, t:"O dilúvio", ref:"Gênesis 6–8", link:"gn/6", min:15,
+  ctx:"O mundo mergulha em violência, e Deus recomeça a criação através de um homem, uma arca e muita chuva.",
+  foco:"Note os paralelos com a criação: águas, vento sobre as águas, e um novo “comecem de novo”.",
+  reflex:"Noé passou anos construindo algo que ninguém entendia. O que você está construindo que exige paciência de longo prazo?",
+  quiz:{ q:"O que Noé solta para saber se a terra secou?", o:["Uma pomba","Um falcão","Uma andorinha"], a:0 },
+  pearl:"A palavra usada para a “arca” de Noé é a mesma usada para o cesto onde o bebê Moisés é colocado no rio — dois resgates dentro de uma caixa flutuante." },
+
+{ j:0, t:"O arco-íris e a torre", ref:"Gênesis 9.1–17; 11.1–9", link:"gn/9", min:8,
+  ctx:"Depois do dilúvio, uma aliança selada no céu. Depois, a humanidade tenta “fazer um nome” construindo uma torre até os céus.",
+  foco:"Compare: em Babel, os homens sobem para alcançar o céu; no arco-íris, é Deus quem desce um sinal até eles.",
+  reflex:"Qual a diferença entre construir algo grande e construir algo para “fazer nome”?",
+  quiz:{ q:"O que Deus confunde na história da torre de Babel?", o:["Os planos da construção","As línguas dos povos","Os materiais da torre"], a:1 },
+  pearl:"“Babel” soa como a palavra hebraica para “confusão” (balal) — o nome da cidade virou uma piada embutida no próprio texto." },
+
+{ j:0, t:"O chamado de Abraão", ref:"Gênesis 12; 15", link:"gn/12", min:10,
+  ctx:"Deus escolhe um homem de 75 anos, sem filhos, e promete fazer dele uma grande nação. Abraão sai sem saber para onde vai.",
+  foco:"No capítulo 15, repare que é Deus quem passa entre os animais da aliança — Ele assume o compromisso sozinho.",
+  reflex:"Abraão saiu sem mapa, só com uma promessa. O que você faria se tivesse certeza de que não ia dar errado?",
+  quiz:{ q:"O que Deus mostra a Abraão como sinal da promessa de descendência?", o:["As estrelas do céu","A areia do deserto","As águas do mar"], a:0 },
+  pearl:"Três grandes religiões — judaísmo, cristianismo e islamismo — traçam suas raízes até esse mesmo capítulo 12 de Gênesis." },
+
+{ j:0, t:"Visitantes e fogo", ref:"Gênesis 18–19", link:"gn/18", min:14,
+  ctx:"Abraão recebe três visitantes misteriosos, negocia com Deus pelo destino de uma cidade, e Sodoma encontra seu fim.",
+  foco:"Acompanhe a negociação de Abraão: de 50 justos até 10. Ele fala com Deus como quem regateia numa feira.",
+  reflex:"Abraão intercede por uma cidade que não era dele. Por quem você “negociaria” hoje?",
+  quiz:{ q:"O que a esposa de Ló faz que a transforma em estátua de sal?", o:["Volta para buscar seus bens","Olha para trás","Se recusa a sair da cidade"], a:1 },
+  pearl:"Sara ri escondida ao ouvir que terá um filho na velhice — e o nome do filho, Isaque, significa literalmente “ele ri”." },
+
+{ j:0, t:"O filho da promessa", ref:"Gênesis 21–22", link:"gn/21", min:11,
+  ctx:"Isaque finalmente nasce — e então vem o capítulo mais tenso de Gênesis: o pedido do sacrifício no monte Moriá.",
+  foco:"Conte quantas vezes aparece a palavra “filho” no capítulo 22. O texto não deixa você esquecer o peso da cena.",
+  reflex:"“Deus proverá” é a frase-chave da história. Onde você precisa dessa frase hoje?",
+  quiz:{ q:"O que Abraão encontra preso no arbusto no monte?", o:["Um cordeiro","Um carneiro","Um bode"], a:1 },
+  pearl:"O monte Moriá, onde Isaque foi poupado, é tradicionalmente identificado como a região onde séculos depois seria construído o templo de Jerusalém." },
+
+{ j:0, t:"Uma esposa para Isaque", ref:"Gênesis 24", link:"gn/24", min:12,
+  ctx:"O capítulo mais longo de Gênesis é, basicamente, uma história de “como conheci sua mãe”: um servo, uma missão e um poço.",
+  foco:"Repare no teste do servo: ele procura caráter (generosidade com estranhos e camelos), não aparência.",
+  reflex:"O servo orou pedindo um sinal ligado a bondade prática. Que “sinal de caráter” você valoriza nas pessoas?",
+  quiz:{ q:"Como Rebeca demonstra que é a escolhida?", o:["Oferece água ao servo e aos camelos","Reconhece o servo de Abraão","Apresenta sua família primeiro"], a:0 },
+  pearl:"Dar de beber a dez camelos sedentos podia significar tirar do poço mais de 900 litros de água — o gesto de Rebeca era um pequeno maratona." },
+
+{ j:0, t:"Gêmeos em guerra", ref:"Gênesis 25.19–34; 27", link:"gn/25", min:11,
+  ctx:"Esaú e Jacó brigam desde o ventre. Um prato de lentilhas, um pai cego e uma bênção roubada mudam tudo.",
+  foco:"Observe como cada personagem engana ou é enganado — ninguém sai limpo dessa história.",
+  reflex:"Esaú trocou o futuro por uma fome momentânea. Que “pratos de lentilha” disputam sua atenção com seus objetivos?",
+  quiz:{ q:"O que Jacó veste para se passar por Esaú diante do pai?", o:["As roupas do irmão e peles de cabrito","Uma túnica colorida","A armadura de caça de Esaú"], a:0 },
+  pearl:"O nome “Jacó” vem de “calcanhar” — ele nasceu segurando o calcanhar do irmão, e o nome virou sinônimo de “aquele que passa a perna”." },
+
+{ j:0, t:"A escada e o enganador enganado", ref:"Gênesis 28.10–22; 29", link:"gn/28", min:11,
+  ctx:"Fugindo do irmão, Jacó sonha com uma escada até o céu — e depois prova do próprio veneno ao ser enganado pelo tio Labão.",
+  foco:"Repare na ironia: o homem que enganou o pai no escuro é enganado numa noite de núpcias no escuro.",
+  reflex:"Jacó trabalhou 7 anos que “pareceram dias” por amor. O que faz o esforço parecer leve para você?",
+  quiz:{ q:"Com quem Jacó se casa primeiro, sem saber?", o:["Raquel","Lia","Diná"], a:1 },
+  pearl:"A frase de Jacó ao acordar — “o Senhor está neste lugar, e eu não sabia” — virou uma das linhas mais citadas da Bíblia sobre encontrar Deus onde menos se espera." },
+
+{ j:0, t:"A luta e o abraço", ref:"Gênesis 32–33", link:"gn/32", min:12,
+  ctx:"Vinte anos depois, Jacó volta para encarar Esaú. Na véspera, luta a noite inteira com um homem misterioso e sai mancando — e com um nome novo.",
+  foco:"Note o contraste: Jacó se prepara para uma guerra, e recebe um abraço e choro.",
+  reflex:"Jacó carregou por 20 anos o medo de um reencontro que terminou em abraço. Existe alguma conversa que você está adiando?",
+  quiz:{ q:"Qual novo nome Jacó recebe após a luta?", o:["Israel","Efraim","Emanuel"], a:0 },
+  pearl:"“Israel” pode ser traduzido como “aquele que luta com Deus” — o nome de todo um povo nasceu de uma noite de luta corpo a corpo." },
+
+{ j:0, t:"O sonhador vendido", ref:"Gênesis 37; 39", link:"gn/37", min:12,
+  ctx:"Começa a história de José: o filho favorito, a túnica especial, os sonhos de grandeza — e os irmãos que o vendem como escravo.",
+  foco:"Marque a frase que se repete no capítulo 39: “o Senhor estava com José”. Ela aparece nos piores momentos, não nos melhores.",
+  reflex:"José prosperou até dentro de uma prisão injusta. O que significa dar o seu melhor num lugar que você não escolheu?",
+  quiz:{ q:"Por que José vai parar na prisão no Egito?", o:["Por roubar do seu senhor","Pela acusação falsa da esposa de Potifar","Por interpretar mal um sonho"], a:1 },
+  pearl:"A famosa “túnica colorida” de José talvez fosse, no hebraico, uma “túnica de mangas longas” — roupa de quem não trabalha no campo. O presente era uma provocação." },
+
+{ j:0, t:"Da prisão ao palácio", ref:"Gênesis 40–41", link:"gn/40", min:13,
+  ctx:"Dois prisioneiros sonham, um copeiro esquece, e dois anos depois o faraó tem um pesadelo que só José consegue decifrar.",
+  foco:"Repita mentalmente a linha do tempo: 13 anos entre o poço e o palácio. O texto acelera, mas a vida de José não acelerou.",
+  reflex:"José ficou 2 anos esquecido por alguém que ele ajudou. Como você lida com reconhecimento que demora a chegar?",
+  quiz:{ q:"O que os sonhos do faraó anunciavam?", o:["Uma guerra vinda do norte","7 anos de fartura e 7 de fome","A morte do copeiro e do padeiro"], a:1 },
+  pearl:"José tinha 30 anos quando assumiu o governo do Egito — a mesma idade com que, segundo Lucas, Jesus começou seu ministério público." },
+
+{ j:0, t:"O teste dos irmãos", ref:"Gênesis 42–44", link:"gn/42", min:16,
+  ctx:"A fome traz os irmãos de José ao Egito — e eles não o reconhecem. José arma um teste elaborado para ver se eles mudaram.",
+  foco:"Observe Judá, o mesmo que sugeriu vender José, agora se oferecendo como escravo no lugar do irmão caçula.",
+  reflex:"O teste de José media uma coisa: será que eles abandonariam outro irmão? Que evidência mostraria que alguém realmente mudou?",
+  quiz:{ q:"O que é escondido na bagagem de Benjamim?", o:["A taça de prata de José","Moedas de ouro do faraó","O anel do governador"], a:0 },
+  pearl:"Esta é uma leitura um pouco mais longa — mas é praticamente um episódio de série: disfarces, acusações falsas e um irmão mantido como refém." },
+
+{ j:0, t:"“Eu sou José”", ref:"Gênesis 45; 50.15–21", link:"gn/45", min:9,
+  ctx:"A revelação: José chora tão alto que o palácio inteiro ouve. E anos depois, diante dos irmãos com medo, ele resume sua vida em uma frase.",
+  foco:"Guarde a frase final: “vocês planejaram o mal contra mim, mas Deus o tornou em bem”. É a chave de toda a jornada.",
+  reflex:"José escolheu ler sua própria história pela lente do propósito, não da mágoa. Que capítulo da sua história você poderia reler assim?",
+  quiz:{ q:"Como José interpreta tudo o que sofreu?", o:["Como castigo pelos seus sonhos de orgulho","Como azar que ele superou sozinho","Como algo que Deus usou para preservar vidas"], a:2 },
+  pearl:"José perdoa décadas antes de qualquer mandamento sobre perdão existir — Gênesis termina não com vingança, mas com um homem sustentando a família que o traiu." },
+
+/* ---------- JORNADA 2 · LIBERTAÇÃO (Êxodo) ---------- */
+{ j:1, t:"O bebê no rio", ref:"Êxodo 1–2", link:"ex/1", min:10,
+  ctx:"Um novo faraó escraviza Israel e manda matar os bebês. Uma mãe desobedece, um cesto flutua, e a filha do próprio faraó cria o futuro libertador.",
+  foco:"Repare que os heróis dos dois primeiros capítulos são todas mulheres: parteiras, mãe, irmã e princesa.",
+  reflex:"As parteiras praticaram uma desobediência corajosa e silenciosa. Quando fazer o certo exige coragem discreta?",
+  quiz:{ q:"Quem encontra o bebê Moisés no rio?", o:["Uma serva hebreia","A filha do faraó","A esposa do faraó"], a:1 },
+  pearl:"O faraó tentou usar o rio Nilo para matar os meninos hebreus — e foi exatamente o Nilo que carregou Moisés para dentro do palácio dele." },
+
+{ j:1, t:"A sarça em chamas", ref:"Êxodo 3–4", link:"ex/3", min:11,
+  ctx:"Quarenta anos depois de fugir do Egito, Moisés encontra um arbusto que queima sem se consumir — e recebe a missão que passou a vida evitando.",
+  foco:"Conte as desculpas de Moisés: são cinco. E veja como Deus responde a cada uma.",
+  reflex:"“Quem sou eu para ir?” — a pergunta de Moisés é muito atual. Qual missão você sente que é “grande demais” para você?",
+  quiz:{ q:"Qual nome Deus revela a Moisés na sarça?", o:["“El Shaddai”","“Eu Sou o que Sou”","“O Deus dos exércitos”"], a:1 },
+  pearl:"Moisés alega não saber falar bem — e o homem “lento no falar” acabou tradicionalmente associado aos cinco primeiros livros da Bíblia." },
+
+{ j:1, t:"Deixe o meu povo ir", ref:"Êxodo 5; 7", link:"ex/5", min:10,
+  ctx:"Moisés confronta o faraó pela primeira vez — e tudo piora antes de melhorar. Começa o duelo entre o Deus de Israel e os deuses do Egito.",
+  foco:"Repare que após o primeiro pedido a escravidão fica mais pesada. O caminho da liberdade começou parecendo um retrocesso.",
+  reflex:"O povo culpou Moisés quando a situação piorou. Como você reage quando fazer a coisa certa piora as coisas no curto prazo?",
+  quiz:{ q:"Qual é a primeira praga sobre o Egito?", o:["As rãs","A água virando sangue","As trevas"], a:1 },
+  pearl:"Cada praga confrontava um deus egípcio específico: o Nilo era divinizado, o sol era o deus Rá — o duelo era teológico, não só político." },
+
+{ j:1, t:"As pragas", ref:"Êxodo 8–10", link:"ex/8", min:15,
+  ctx:"Rãs, piolhos, moscas, granizo, gafanhotos, trevas: a pressão sobre o Egito aumenta em ondas, e o coração do faraó endurece a cada rodada.",
+  foco:"Acompanhe o padrão do faraó: promete ceder durante a crise, volta atrás quando a crise passa. Repare quantas vezes isso se repete.",
+  reflex:"O faraó só negociava sob pressão e esquecia tudo no alívio. Em que área você só muda quando a dor aperta?",
+  quiz:{ q:"O que acontece na terra de Gósen, onde vivia Israel, durante as pragas?", o:["As pragas chegam mais fracas","As pragas não chegam lá","O povo é evacuado antes"], a:1 },
+  pearl:"Leitura mais longa — se quiser, divida em duas sessões. O texto é repetitivo de propósito: cada ciclo martela a pergunta “quando o faraó vai aprender?”." },
+
+{ j:1, t:"A primeira Páscoa", ref:"Êxodo 11–12", link:"ex/11", min:12,
+  ctx:"A décima praga é anunciada, e Israel recebe instruções estranhas: um cordeiro, sangue nas portas e uma refeição comida às pressas, pronta para partir.",
+  foco:"Note que a liberdade começa com um jantar em família — e que o ritual foi criado antes do evento, para nunca ser esquecido.",
+  reflex:"A Páscoa existe para contar a história aos filhos, geração após geração. Que histórias da sua vida merecem ser recontadas?",
+  quiz:{ q:"O que marcava as casas que seriam poupadas?", o:["Uma lâmpada acesa na janela","Sangue do cordeiro nas portas","Uma faixa de linho branco"], a:1 },
+  pearl:"A Páscoa é celebrada há mais de 3 mil anos — e foi durante uma ceia de Páscoa que Jesus instituiu a Santa Ceia, ligando as duas histórias." },
+
+{ j:1, t:"O mar se abre", ref:"Êxodo 13.17–14.31", link:"ex/13", min:10,
+  ctx:"A cena mais famosa do Antigo Testamento: encurralados entre o exército do faraó e o mar, Israel vê o impossível acontecer.",
+  foco:"Guarde a ordem dada ao povo em pânico: “aquietem-se… e avancem”. Calma e movimento, juntos.",
+  reflex:"Israel foi guiado pelo caminho mais longo, de propósito, para não desistir na primeira guerra. Já houve um “desvio” na sua vida que te protegeu?",
+  quiz:{ q:"O que guiava o povo de dia e de noite no deserto?", o:["Uma estrela e uma águia","Uma nuvem e uma coluna de fogo","Moisés com uma tocha"], a:1 },
+  pearl:"O texto diz que um vento oriental soprou a noite toda antes de o mar se abrir — o milagre teve horas de preparação invisível durante a madrugada." },
+
+{ j:1, t:"Cântico e pão do céu", ref:"Êxodo 15–16", link:"ex/15", min:11,
+  ctx:"Do outro lado do mar, a primeira reação é música. Três dias depois, a primeira reclamação. E então, todo dia de manhã, algo branco cobre o chão.",
+  foco:"Repare na regra do maná: recolher só o necessário para um dia. Quem estocava, via tudo apodrecer.",
+  reflex:"O maná treinava confiança diária: “o pão de hoje, hoje”. O que significaria viver um dia de cada vez nesta sua semana?",
+  quiz:{ q:"O que significa a palavra “maná”?", o:["“Pão do céu”","“O que é isto?”","“Presente de Deus”"], a:1 },
+  pearl:"“Maná” vem da pergunta que o povo fez ao ver aquilo no chão: man hu?, “o que é isto?”. O alimento ficou batizado com a própria dúvida." },
+
+{ j:1, t:"O monte em fogo", ref:"Êxodo 19–20", link:"ex/19", min:10,
+  ctx:"Três meses após a saída do Egito, Israel acampa aos pés do Sinai. Entre trovões e fumaça, Deus fala dez palavras que moldariam a civilização.",
+  foco:"Antes dos mandamentos, vem uma frase de identidade: “Eu sou o Senhor que tirou você do Egito”. Primeiro o resgate, depois as regras.",
+  reflex:"Os mandamentos começam lembrando a libertação, não a obrigação. O que muda quando regras nascem de um relacionamento?",
+  quiz:{ q:"Qual é o primeiro mandamento?", o:["Não matarás","Não terás outros deuses além de mim","Guardarás o dia de descanso"], a:1 },
+  pearl:"Os Dez Mandamentos cabem em menos de 320 palavras — e influenciaram sistemas jurídicos inteiros por mais de três milênios." },
+
+{ j:1, t:"O bezerro de ouro", ref:"Êxodo 32; 34.1–10", link:"ex/32", min:11,
+  ctx:"Moisés demora no monte, o povo entra em pânico e fabrica um deus de ouro. A aliança recém-feita quase termina — e é refeita.",
+  foco:"Repare em Moisés intercedendo pelo povo, recusando a oferta de recomeçar sem eles. E na autoapresentação de Deus no cap. 34: “compassivo e paciente”.",
+  reflex:"O povo trocou o Deus invisível por algo visível e imediato. O que você tende a buscar quando a espera fica longa demais?",
+  quiz:{ q:"Quem fabrica o bezerro de ouro?", o:["Josué","Arão","Miriã"], a:1 },
+  pearl:"Êxodo 34.6 — “Deus compassivo e misericordioso, paciente, cheio de amor” — é o versículo mais citado pela própria Bíblia: outros livros o repetem ao menos dez vezes." },
+
+/* ---------- JORNADA 3 · CORAGEM (Rute, Jonas, Daniel, Ester) ---------- */
+{ j:2, t:"Rute: aonde você for", ref:"Rute 1–2", link:"rt/1", min:10,
+  ctx:"Uma pequena história de fome, luto e lealdade: Noemi perde tudo, e sua nora estrangeira se recusa a abandoná-la.",
+  foco:"Guarde o voto de Rute no capítulo 1 — uma das declarações de lealdade mais bonitas já escritas.",
+  reflex:"Rute escolheu ficar quando tinha todas as razões para partir. Quem já fez isso por você — ou por quem você faria?",
+  quiz:{ q:"Em qual campo Rute vai colher espigas “por acaso”?", o:["No campo de Boaz","No campo de Elimeleque","No campo do rei"], a:0 },
+  pearl:"A lei israelita mandava deixar as sobras da colheita para pobres e estrangeiros — a “rede social” dos tempos antigos, e a porta de entrada de Rute na história." },
+
+{ j:2, t:"Rute: o resgatador", ref:"Rute 3–4", link:"rt/3", min:9,
+  ctx:"Um plano ousado na eira, um parente resgatador e um final que ninguém via chegando: a estrangeira vira bisavó do maior rei de Israel.",
+  foco:"Repare como Boaz protege a reputação de Rute em cada passo — generosidade com elegância.",
+  reflex:"A história de Rute é feita de pequenas bondades práticas, sem nenhum milagre visível. Que pequena bondade está ao seu alcance esta semana?",
+  quiz:{ q:"Quem é o bisneto de Rute e Boaz?", o:["Samuel","Saul","Davi"], a:2 },
+  pearl:"Rute, uma moabita estrangeira, aparece nomeada na genealogia de Jesus em Mateus 1 — uma das poucas mulheres citadas ali." },
+
+{ j:2, t:"Jonas: fugindo de Deus", ref:"Jonas 1–2", link:"jn/1", min:8,
+  ctx:"Um profeta recebe uma missão e compra passagem no navio para a direção exatamente oposta. Segue-se uma tempestade e o peixe mais famoso da literatura.",
+  foco:"Repare na ironia: os marinheiros pagãos oram e agem, enquanto o profeta dorme no porão.",
+  reflex:"Jonas fugiu não por medo, mas porque discordava da missão. Você já evitou algo certo simplesmente porque não queria que desse certo?",
+  quiz:{ q:"Para onde Jonas tenta fugir?", o:["Társis","Egito","Babilônia"], a:0 },
+  pearl:"Nínive ficava a nordeste, por terra; Társis provavelmente ficava na Espanha, o extremo oeste do mundo conhecido. Jonas não fugiu “um pouco” — foi para o fim do mapa." },
+
+{ j:2, t:"Jonas: a cidade poupada", ref:"Jonas 3–4", link:"jn/3", min:8,
+  ctx:"Segunda chance: Jonas prega, a cidade inteira se arrepende — e o profeta fica furioso porque o plano deu certo.",
+  foco:"O livro termina com uma pergunta de Deus, sem resposta. Ela é dirigida a Jonas — e ao leitor.",
+  reflex:"Jonas queria justiça para os outros e misericórdia para si. Com quem você tem menos paciência do que gostaria de admitir?",
+  quiz:{ q:"O que faz Jonas ficar irado no final?", o:["Deus perdoar Nínive","A planta que morreu","Ter que voltar a pé"], a:0 },
+  pearl:"Jonas é o único “profeta” cujo livro é quase todo narrativa — e possivelmente uma comédia proposital: tudo obedece a Deus (mar, peixe, planta, verme), menos o profeta." },
+
+{ j:2, t:"Daniel: à mesa do rei", ref:"Daniel 1", link:"dn/1", min:6,
+  ctx:"Jovens de Jerusalém são levados cativos para a Babilônia e treinados para servir o império. Daniel decide onde traçar sua primeira linha.",
+  foco:"Repare que Daniel resiste com educação e propõe um teste — convicção firme, tom gentil.",
+  reflex:"Daniel aceitou o nome novo e a escola nova, mas não a mesa. Como você decide o que é negociável e o que não é?",
+  quiz:{ q:"O que Daniel pede para comer no lugar da comida do rei?", o:["Pão e mel","Legumes e água","Carne preparada à parte"], a:1 },
+  pearl:"Etapa curtinha — 1 capítulo só. A Babilônia trocava os nomes dos jovens para apagar sua identidade: “Daniel” (Deus é meu juiz) virou “Beltessazar”, um nome pagão." },
+
+{ j:2, t:"Daniel: o sonho da estátua", ref:"Daniel 2", link:"dn/2", min:9,
+  ctx:"O rei tem um sonho, esquece o conteúdo e exige que os sábios adivinhem o sonho e a interpretação — ou todos morrem.",
+  foco:"Note a primeira reação de Daniel diante da sentença de morte: pedir tempo e reunir os amigos para orar.",
+  reflex:"Daniel enfrentou uma crise impossível com calma e método. Qual é o seu primeiro reflexo diante de um problema sem solução aparente?",
+  quiz:{ q:"O que destrói a estátua no sonho do rei?", o:["Um terremoto","Uma pedra cortada sem mãos humanas","Um exército vindo do norte"], a:1 },
+  pearl:"A estátua de ouro, prata, bronze e ferro é lida tradicionalmente como uma linha do tempo de impérios: Babilônia, Média-Pérsia, Grécia e Roma." },
+
+{ j:2, t:"Daniel: a fornalha", ref:"Daniel 3", link:"dn/3", min:8,
+  ctx:"Uma estátua de ouro, uma orquestra e uma ordem: curve-se ou queime. Três jovens escolhem a fornalha.",
+  foco:"Guarde a resposta deles: “nosso Deus pode nos livrar — mas, se não o fizer, ainda assim não vamos nos curvar”.",
+  reflex:"A fé deles não dependia do resultado (“mas se não…”). Existe algo que você defenderia mesmo sem garantia de final feliz?",
+  quiz:{ q:"O que o rei vê dentro da fornalha?", o:["Três homens ilesos e um quarto homem","Apenas cinzas","Os três jovens desmaiados"], a:0 },
+  pearl:"A fornalha foi aquecida “sete vezes mais” — os soldados que jogaram os três morreram só de chegar perto. E os jovens saíram sem sequer cheiro de fumaça." },
+
+{ j:2, t:"Daniel: a escrita na parede", ref:"Daniel 5", link:"dn/5", min:8,
+  ctx:"Anos depois, num banquete decadente, uma mão sem corpo escreve palavras misteriosas na parede do palácio. Só Daniel, já idoso, sabe ler.",
+  foco:"Repare no detalhe do tempo: naquela mesma noite, o império mais poderoso do mundo cai.",
+  reflex:"Belsazar sabia da história de Nabucodonosor e ignorou a lição. Que lição “de outra pessoa” você não quer ter que aprender na pele?",
+  quiz:{ q:"O que significava, em resumo, a escrita na parede?", o:["“Seu reino foi contado, pesado e dividido”","“O rei viverá para sempre”","“A fome vem em sete anos”"], a:0 },
+  pearl:"A expressão “a escrita na parede” — usada até hoje para um fim inevitável e anunciado — nasceu exatamente deste capítulo." },
+
+{ j:2, t:"Daniel: a cova dos leões", ref:"Daniel 6", link:"dn/6", min:8,
+  ctx:"Daniel, agora com mais de 80 anos, é vítima de uma armadilha burocrática montada por invejosos. A rotina de oração dele vira crime.",
+  foco:"Repare: ao saber do decreto, Daniel não muda nada — mesma janela, mesmos horários, mesma oração de sempre.",
+  reflex:"O que salvou Daniel foi uma rotina construída décadas antes da crise. Que hábito você quer ter consolidado quando a sua “cova” chegar?",
+  quiz:{ q:"Com que frequência Daniel orava, segundo o texto?", o:["Uma vez por semana","Três vezes ao dia","Apenas de madrugada"], a:1 },
+  pearl:"Quem passou a noite em claro foi o rei, não Daniel — o texto diz que Dario não comeu, não dormiu e correu à cova ao amanhecer." },
+
+{ j:2, t:"Ester: para um momento como este", ref:"Ester 2–4", link:"et/2", min:13,
+  ctx:"Uma órfã judia vira rainha da Pérsia escondendo sua origem — até que um decreto de extermínio a obriga a escolher entre o silêncio e o risco.",
+  foco:"Guarde a frase de Mordecai: “quem sabe se não foi para um momento como este que você chegou à posição de rainha?”.",
+  reflex:"Ester tinha acesso, mas usar esse acesso custava caro. Que “posição” você ocupa hoje que pode servir a alguém além de você?",
+  quiz:{ q:"O que Ester pede ao povo antes de ir falar com o rei?", o:["Que orem em silêncio por um mês","Que jejuem por três dias","Que fujam da capital"], a:1 },
+  pearl:"O livro de Ester não menciona a palavra “Deus” nenhuma vez — e mesmo assim a providência dele aparece em cada coincidência da trama." },
+
+{ j:2, t:"Ester: a virada", ref:"Ester 5–8", link:"et/5", min:12,
+  ctx:"Dois banquetes, uma noite de insônia real e a reviravolta mais elegante da Bíblia: o vilão cai na armadilha que construiu.",
+  foco:"Repare na cadeia de “coincidências”: a insônia do rei, o livro de crônicas aberto na página certa, Hamã chegando na hora errada.",
+  reflex:"A virada de Ester veio de paciência estratégica: ela esperou o segundo banquete. Quando vale a pena esperar o momento certo em vez de agir logo?",
+  quiz:{ q:"O que o rei manda fazer com a forca que Hamã construiu?", o:["Queimá-la em praça pública","Enforcar o próprio Hamã nela","Derrubá-la e construir um altar"], a:1 },
+  pearl:"A festa de Purim, que celebra essa virada, é comemorada pelos judeus até hoje — com leitura pública de Ester, fantasias e muito barulho ao ouvir o nome de Hamã." },
+
+/* ---------- JORNADA 4 · O CORAÇÃO DE UM REI (Samuel/Davi) ---------- */
+{ j:3, t:"A oração de Ana", ref:"1 Samuel 1; 3", link:"1sm/1", min:10,
+  ctx:"Uma mulher humilhada pela infertilidade ora em silêncio no templo — e seu filho, Samuel, se torna o profeta que ouvirá a voz de Deus ainda menino.",
+  foco:"Repare na resposta de Samuel ao chamado noturno: “fala, que o teu servo ouve”. Simples assim.",
+  reflex:"Ana entregou a Deus exatamente aquilo que mais queria. O que seria, para você, “orar com tudo” por algo?",
+  quiz:{ q:"Quantas vezes Deus chama Samuel antes que ele entenda quem fala?", o:["Uma","Três","Sete"], a:1 },
+  pearl:"Eli achou que Ana estava bêbada porque ela orava movendo os lábios sem emitir som — a oração silenciosa era tão rara que parecia embriaguez." },
+
+{ j:3, t:"Um rei como as nações", ref:"1 Samuel 8–10", link:"1sm/8", min:13,
+  ctx:"Israel exige um rei “como todas as outras nações”. Samuel avisa do preço, o povo insiste, e um rapaz alto procurando jumentas perdidas acaba ungido.",
+  foco:"Repare no aviso de Samuel sobre o que um rei vai tomar do povo — a palavra “tomará” se repete como um alarme.",
+  reflex:"O povo trocou algo único por “ser como todo mundo”. Onde a pressão de ser igual aos outros pesa na sua vida?",
+  quiz:{ q:"O que Saul estava fazendo quando encontrou Samuel?", o:["Procurando as jumentas do pai","Treinando para a guerra","Vendendo trigo na cidade"], a:0 },
+  pearl:"Quando chegou a hora da coroação pública, Saul estava escondido no meio da bagagem — o primeiro rei de Israel começou fugindo do próprio cargo." },
+
+{ j:3, t:"O ungido improvável", ref:"1 Samuel 15.34–16.23", link:"1sm/16", min:8,
+  ctx:"Saul falha, e Samuel é enviado a Belém para ungir um novo rei entre os filhos de Jessé. O escolhido nem foi chamado para o jantar.",
+  foco:"Guarde a frase central: “o homem vê a aparência, mas o Senhor vê o coração”.",
+  reflex:"Davi foi esquecido pela própria família e escolhido por Deus. Que qualidade sua passa despercebida — e ainda assim importa?",
+  quiz:{ q:"O que Davi fazia quando foi chamado para ser ungido?", o:["Cuidava das ovelhas","Tocava harpa no palácio","Lutava contra os filisteus"], a:0 },
+  pearl:"O primeiro emprego de Davi no palácio foi como músico-terapeuta: sua harpa acalmava as crises de Saul — o futuro rei começou tocando para o rei que iria substituir." },
+
+{ j:3, t:"Davi e Golias", ref:"1 Samuel 17", link:"1sm/17", min:9,
+  ctx:"A cena mais famosa da Bíblia hebraica: um gigante de quase três metros, quarenta dias de provocação, e um adolescente com uma funda.",
+  foco:"Repare no raciocínio de Davi: ele não ignora o tamanho de Golias — ele lembra dos leões e ursos que já venceu. Coragem baseada em histórico.",
+  reflex:"Davi recusou a armadura de Saul e lutou com as ferramentas que dominava. Quais são as “cinco pedras” que você já sabe usar?",
+  quiz:{ q:"Quantas pedras Davi pegou no riacho?", o:["Uma","Três","Cinco"], a:2 },
+  pearl:"Golias media “seis côvados e um palmo” (~2,90 m) e sua cota de malha pesava cerca de 57 kg — mais do que o próprio Davi devia pesar." },
+
+{ j:3, t:"Amizade e perseguição", ref:"1 Samuel 18; 20", link:"1sm/18", min:11,
+  ctx:"Davi vira herói nacional, Saul mergulha em ciúme assassino, e o filho do rei — Jônatas — escolhe o amigo em vez do trono.",
+  foco:"Note o custo da lealdade de Jônatas: defender Davi significava abrir mão de ser o próximo rei.",
+  reflex:"Jônatas celebrou o sucesso de alguém que iria “ultrapassá-lo”. Você consegue torcer de verdade por quem cresce mais rápido que você?",
+  quiz:{ q:"Qual sinal combinado Jônatas usa para avisar Davi do perigo?", o:["Três flechas atiradas no campo","Uma tocha acesa na muralha","Um mensageiro com um anel"], a:0 },
+  pearl:"O texto diz que Saul se incomodou com uma música: “Saul matou milhares, Davi, dezenas de milhares”. Uma canção popular acendeu anos de perseguição." },
+
+{ j:3, t:"Poupar o inimigo", ref:"1 Samuel 24", link:"1sm/24", min:6,
+  ctx:"Numa caverna no deserto, Saul entra sozinho e indefeso — exatamente onde Davi e seus homens estão escondidos. A vingança perfeita se oferece de bandeja.",
+  foco:"Repare que a consciência de Davi pesou por muito menos que um golpe: apenas por cortar a ponta do manto.",
+  reflex:"Davi teve o poder de se vingar e escolheu não usar. Qual é a diferença entre vencer alguém e se tornar igual a ele?",
+  quiz:{ q:"O que Davi corta enquanto Saul está na caverna?", o:["A correia da sandália","A ponta do manto","Uma mecha de cabelo"], a:1 },
+  pearl:"Capítulo único e curto. Davi teria ainda uma segunda chance idêntica de matar Saul (cap. 26) — e recusaria de novo. Não foi impulso: foi caráter." },
+
+{ j:3, t:"Rei, enfim — e uma promessa", ref:"2 Samuel 5.1–12; 6; 7", link:"2sm/5", min:12,
+  ctx:"Após anos de fuga, Davi finalmente reina, leva a arca para Jerusalém dançando pelas ruas, e recebe de Deus uma promessa que atravessa séculos.",
+  foco:"No capítulo 7, repare na inversão: Davi quer construir uma casa para Deus, e Deus responde que construirá uma “casa” (dinastia) para Davi.",
+  reflex:"Davi dançou “com todas as suas forças” sem se importar com a própria imagem. O que te impediria de celebrar assim?",
+  quiz:{ q:"O que Deus promete a Davi no capítulo 7?", o:["Que ele nunca perderia uma batalha","Que seu trono seria estabelecido para sempre","Que ele construiria o templo"], a:1 },
+  pearl:"A promessa de 2 Samuel 7 é a raiz da expectativa do “Messias, filho de Davi” — mil anos depois, os evangelhos abrem apresentando Jesus exatamente assim." },
+
+{ j:3, t:"A grande queda", ref:"2 Samuel 11–12", link:"2sm/11", min:11,
+  ctx:"O capítulo mais honesto da Bíblia sobre poder: Davi, no auge, comete seu pior erro — e um profeta o confronta com uma simples história de ovelha.",
+  foco:"Repare na primeira frase do cap. 11: era a época “em que os reis saem à guerra” — e Davi ficou em casa. A queda começou na agenda.",
+  reflex:"Natã usou uma história para furar as defesas de Davi. Que verdade sobre você mesmo você só consegue ver “de fora”?",
+  quiz:{ q:"Como Natã confronta Davi?", o:["Com uma parábola sobre uma ovelhinha","Lendo a lei em voz alta","Diante de todo o exército"], a:0 },
+  pearl:"A Bíblia não esconde a falha do seu maior rei — historiadores apontam essa honestidade brutal com os próprios heróis como uma marca rara na literatura antiga." },
+
+{ j:3, t:"Salmos do vale e do cuidado", ref:"Salmos 51; 23; 139", link:"sl/51", min:9,
+  ctx:"Três orações de Davi para fechar a jornada: o pedido de perdão após a queda, o salmo do pastor, e a certeza de ser conhecido por inteiro.",
+  foco:"Leia devagar — salmos são para saborear, não para vencer. Escolha um versículo de cada um para guardar.",
+  reflex:"“Cria em mim um coração puro” — Davi pede recomeço, não disfarce. Qual dos três salmos falou mais com o seu momento?",
+  quiz:{ q:"No Salmo 23, o que o pastor prepara “na presença dos inimigos”?", o:["Um abrigo","Uma mesa","Um caminho"], a:1 },
+  pearl:"O Salmo 51 traz no cabeçalho o próprio contexto: “quando o profeta Natã veio a ele”. É a trilha sonora oficial do capítulo que você acabou de ler." },
+
+/* ---------- JORNADA 5 · JESUS (Marcos) ---------- */
+{ j:4, t:"O início da boa notícia", ref:"Marcos 1–2", link:"mc/1", min:11,
+  ctx:"Marcos não tem manjedoura nem genealogia: em uma página, João batiza, Jesus é tentado, chama pescadores e lota uma casa em Cafarnaum.",
+  foco:"Conte quantas vezes aparece “imediatamente” — é a palavra favorita de Marcos. O evangelho tem pressa.",
+  reflex:"Os pescadores largaram as redes “imediatamente”. O que um chamado precisaria ter para você largar algo de imediato?",
+  quiz:{ q:"Como os amigos do paralítico o levam até Jesus?", o:["Pela porta dos fundos","Abrindo um buraco no telhado","Esperando na sinagoga"], a:1 },
+  pearl:"Marcos usa a palavra grega euthys (“imediatamente”) mais de 40 vezes — mais que todo o restante do Novo Testamento somado." },
+
+{ j:4, t:"Parábolas e tempestade", ref:"Marcos 3–4", link:"mc/3", min:11,
+  ctx:"Jesus escolhe os Doze, ensina por parábolas de sementes e solos, e termina o dia dormindo num barco no meio de uma tempestade.",
+  foco:"Na parábola do semeador, repare que o problema nunca é a semente — é sempre o solo.",
+  reflex:"Dos quatro solos (beira do caminho, pedras, espinhos, terra boa), qual descreve melhor a sua atenção nesta fase da vida?",
+  quiz:{ q:"O que Jesus estava fazendo durante a tempestade?", o:["Orando na proa","Dormindo na popa","Remando com os discípulos"], a:1 },
+  pearl:"O mar da Galileia fica num vale cercado de montanhas, e tempestades violentas se formam em minutos — os pescadores experientes do barco tinham motivo real de pânico." },
+
+{ j:4, t:"Poder sobre tudo", ref:"Marcos 5–6", link:"mc/5", min:13,
+  ctx:"Quatro cenas de poder: um homem possesso, uma mulher doente há 12 anos, uma menina morta — e uma multidão de 5 mil alimentada com um lanche.",
+  foco:"Repare como Jesus trata cada pessoa de forma diferente: ele para a multidão inteira por causa de um toque anônimo.",
+  reflex:"A mulher tocou o manto escondida, e Jesus fez questão de vê-la e ouvi-la. Por que ser visto importa tanto quanto ser curado?",
+  quiz:{ q:"O que sobra após a multiplicação dos pães?", o:["Doze cestos cheios","Sete jarros","Nada — tudo foi consumido"], a:0 },
+  pearl:"“Talita cumi” (“menina, levante-se”) é uma das poucas frases preservadas no aramaico original — provavelmente as palavras exatas, na língua exata, que Jesus falou." },
+
+{ j:4, t:"Pão para todos", ref:"Marcos 7–8", link:"mc/7", min:11,
+  ctx:"Jesus cruza fronteiras: cura a filha de uma estrangeira, alimenta outra multidão em território pagão, e faz aos discípulos a pergunta central do livro.",
+  foco:"Guarde a pergunta do capítulo 8: “e vocês, quem dizem que eu sou?”. Todo o evangelho de Marcos gira em torno dela.",
+  reflex:"Pedro respondeu certo e entendeu errado (queria um Messias sem cruz). O que você espera de Deus que talvez precise ser revisto?",
+  quiz:{ q:"Quem responde “tu és o Cristo” à pergunta de Jesus?", o:["João","Tomé","Pedro"], a:2 },
+  pearl:"Marcos registra duas multiplicações de pães: uma para judeus (12 cestos) e outra em terra de gentios (7 cestos) — pão de sobra para todos os povos." },
+
+{ j:4, t:"A montanha e o caminho", ref:"Marcos 9–10", link:"mc/9", min:13,
+  ctx:"Jesus se transfigura em glória no monte — e desce falando de cruz e serviço. No caminho, os discípulos discutem quem é o maior.",
+  foco:"Repare no contraste repetido: Jesus anuncia sua morte, e os discípulos disputam cargos. Três vezes.",
+  reflex:"“Quem quiser ser o primeiro seja servo de todos.” Como seria aplicar isso no seu trabalho esta semana, de forma concreta?",
+  quiz:{ q:"O que Bartimeu, o cego, faz quando a multidão manda ele se calar?", o:["Desiste e vai embora","Grita ainda mais alto","Espera Jesus passar de novo"], a:1 },
+  pearl:"Ao chamar Bartimeu, Jesus faz a ele a mesma pergunta que fizera aos discípulos ambiciosos: “o que você quer que eu faça por você?”. As respostas é que foram opostas." },
+
+{ j:4, t:"O rei em Jerusalém", ref:"Marcos 11–12", link:"mc/11", min:12,
+  ctx:"Jesus entra em Jerusalém montado num jumentinho, vira as mesas do templo e enfrenta uma bateria de pegadinhas teológicas das autoridades.",
+  foco:"Repare na cena da viúva e suas duas moedinhas — Jesus mede ofertas pelo que sobra, não pelo que se dá.",
+  reflex:"Jesus elogiou a menor oferta do templo. O que isso muda na forma de avaliar a sua própria contribuição — no trabalho, na família, na fé?",
+  quiz:{ q:"Qual é o maior mandamento, segundo Jesus?", o:["Guardar o sábado","Amar a Deus e ao próximo","Honrar pai e mãe"], a:1 },
+  pearl:"A entrada num jumento não foi improviso: cumpria uma profecia de Zacarias de 500 anos antes — o rei que chega manso, não em cavalo de guerra." },
+
+{ j:4, t:"Fique atento", ref:"Marcos 13; 14.1–11", link:"mc/13", min:9,
+  ctx:"Diante do templo, Jesus fala do futuro e da vigilância. Enquanto líderes tramam sua morte, uma mulher quebra um frasco de perfume caríssimo sobre ele.",
+  foco:"Contraste as duas atitudes lado a lado: a mulher que “desperdiça” tudo por amor, e Judas que negocia por dinheiro.",
+  reflex:"O perfume valia o salário de um ano. O que você tem de mais valioso — e o que mereceria esse tipo de gesto?",
+  quiz:{ q:"O que Jesus diz sobre o gesto da mulher do perfume?", o:["Que foi um desperdício necessário","Que seria contado onde o evangelho fosse pregado","Que ela deveria ter vendido e dado aos pobres"], a:1 },
+  pearl:"O perfume de nardo puro vinha da Índia, importado por rotas de caravana — 300 denários era literalmente o salário de um ano inteiro de trabalho." },
+
+{ j:4, t:"A última noite", ref:"Marcos 14.12–72", link:"mc/14", min:13,
+  ctx:"A ceia, o Getsêmani, a prisão e a negação de Pedro — tudo em uma única noite, narrada quase em tempo real.",
+  foco:"Repare na honestidade da oração de Jesus no Getsêmani: “afasta de mim este cálice… mas seja a tua vontade”. Angústia e entrega, juntas.",
+  reflex:"Pedro jurou que morreria com Jesus e negou três vezes na mesma noite. O que essa distância entre intenção e ação te ensina sobre autoconfiança?",
+  quiz:{ q:"O que faz Pedro cair em si após as negações?", o:["O olhar de um soldado","O canto do galo","Um servo o reconhece de novo"], a:1 },
+  pearl:"Marcos cita um jovem que fugiu sem roupa na prisão de Jesus — detalhe estranho que muitos estudiosos leem como a “assinatura” do próprio Marcos na cena." },
+
+{ j:4, t:"Cruz e túmulo vazio", ref:"Marcos 15–16", link:"mc/15", min:11,
+  ctx:"O julgamento, a cruz e a manhã de domingo. Marcos narra o centro da fé cristã com sobriedade e velocidade.",
+  foco:"Repare quem reconhece Jesus na cruz: não os religiosos, mas um centurião romano — o encarregado da execução.",
+  reflex:"As mulheres foram as últimas na cruz e as primeiras no túmulo. O que a constância delas diz sobre a fé nos bastidores?",
+  quiz:{ q:"Quem pede o corpo de Jesus para sepultá-lo?", o:["Pedro","José de Arimateia","Nicodemos"], a:1 },
+  pearl:"Nos manuscritos mais antigos, Marcos termina no verso 16.8, com as mulheres em silêncio e assombro — um final aberto que joga a pergunta para o leitor: e agora, o que você faz com isso?" },
+
+/* ---------- JORNADA 6 · FOGO QUE SE ESPALHA (Atos) ---------- */
+{ j:5, t:"Vento e fogo", ref:"Atos 1–2", link:"atos/1", min:11,
+  ctx:"Jesus sobe aos céus, e dez dias depois o Espírito desce como vento e fogo sobre 120 pessoas numa sala. Pedro, o que negou, prega — e 3 mil creem.",
+  foco:"Compare o Pedro de Marcos 14 com o Pedro de Atos 2. É a mesma pessoa, transformada.",
+  reflex:"A igreja nasceu compartilhando pão, bens e orações diárias. O que dessa primeira comunidade mais falta no mundo de hoje?",
+  quiz:{ q:"O que as pessoas ouviram em Pentecostes que as deixou perplexas?", o:["Cada um ouvia em sua própria língua","Uma voz vinda do céu","O som de trombetas no templo"], a:0 },
+  pearl:"Pentecostes reverte Babel: lá, as línguas se confundiram e dispersaram os povos; aqui, as línguas se multiplicam para reunir gente de todas as nações." },
+
+{ j:5, t:"Coragem diante do conselho", ref:"Atos 3–4", link:"atos/3", min:10,
+  ctx:"Um mendigo coxo cura-se na porta do templo, Pedro e João são presos, e os pescadores sem estudo deixam o supremo tribunal sem resposta.",
+  foco:"Guarde a observação do tribunal: reconheceram que aqueles homens “sem instrução” haviam “estado com Jesus”.",
+  reflex:"“Não podemos deixar de falar do que vimos e ouvimos.” O que você viveu de tão real que não conseguiria negar sob pressão?",
+  quiz:{ q:"O que Pedro diz ao mendigo na porta do templo?", o:["“Volte amanhã cedo”","“Não tenho prata nem ouro, mas o que tenho te dou”","“Sua fé é pequena demais”"], a:1 },
+  pearl:"A primeira reação da igreja à ameaça não foi pedir proteção, mas orar por mais ousadia — e o texto diz que o lugar tremeu." },
+
+{ j:5, t:"Estêvão", ref:"Atos 6–7", link:"atos/6", min:13,
+  ctx:"O primeiro mártir: Estêvão, escolhido para servir mesas, prega o sermão mais longo de Atos e morre perdoando — diante de um jovem chamado Saulo.",
+  foco:"O discurso do cap. 7 é um resumão de tudo que você já leu: Abraão, José, Moisés. Veja quanto você reconhece agora.",
+  reflex:"Estêvão morreu repetindo as palavras de Jesus na cruz: “não lhes atribuas este pecado”. De onde vem uma paz dessas?",
+  quiz:{ q:"Quem guardava as capas dos que apedrejavam Estêvão?", o:["Barnabé","Saulo","Gamaliel"], a:1 },
+  pearl:"A leitura é mais longa, mas o discurso de Estêvão é a melhor “revisão geral” da trilha até aqui — você vai reconhecer cada história citada." },
+
+{ j:5, t:"A estrada de Damasco", ref:"Atos 8.26–40; 9", link:"atos/8", min:11,
+  ctx:"Filipe explica Isaías a um oficial etíope numa estrada deserta — e Saulo, o perseguidor, é derrubado por uma luz a caminho de Damasco.",
+  foco:"Repare na coragem de Ananias: Deus manda ele visitar e curar exatamente o homem que vinha prendê-lo.",
+  reflex:"Ananias chamou de “irmão Saulo” alguém que era seu inimigo declarado. Quem seria a pessoa mais difícil de você chamar de irmão?",
+  quiz:{ q:"O que acontece com Saulo após a visão na estrada?", o:["Fica cego por três dias","Perde a fala por uma semana","Volta imediatamente a Jerusalém"], a:0 },
+  pearl:"O perseguidor da estrada de Damasco se tornaria Paulo — autor de 13 cartas do Novo Testamento. O tribunal que ouviu Estêvão perdeu, ali, seu melhor aluno." },
+
+{ j:5, t:"Sem fronteiras", ref:"Atos 10", link:"atos/10", min:9,
+  ctx:"Duas visões simultâneas — um centurião romano e Pedro num terraço — colidem para derrubar o maior muro do mundo antigo: o que separava judeus e gentios.",
+  foco:"Repare quanto Deus precisou insistir com Pedro: a visão do lençol se repete três vezes.",
+  reflex:"“Deus me mostrou que eu não devia chamar impuro a nenhum homem.” Que muro invisível ainda organiza quem você considera “gente como a gente”?",
+  quiz:{ q:"Qual era a profissão de Cornélio?", o:["Coletor de impostos","Centurião romano","Mercador de púrpura"], a:1 },
+  pearl:"Este capítulo explica por que o cristianismo virou uma fé global e não uma seita regional — a decisão tomada aqui mudou a história do Ocidente." },
+
+{ j:5, t:"Cadeias quebradas", ref:"Atos 12; 16.16–40", link:"atos/12", min:12,
+  ctx:"Duas fugas de prisão: Pedro escapa escoltado por um anjo enquanto a igreja ora, e Paulo e Silas cantam à meia-noite até um terremoto abrir as portas.",
+  foco:"Repare no humor do cap. 12: a igreja ora pela libertação de Pedro e, quando ele bate à porta, ninguém acredita.",
+  reflex:"Paulo e Silas cantavam de madrugada com as costas açoitadas. O que sustenta alguém para cantar dentro da prisão?",
+  quiz:{ q:"O que o carcereiro de Filipos pergunta a Paulo e Silas?", o:["“Quem pagará por este dano?”","“Que devo fazer para ser salvo?”","“Como vocês quebraram as correntes?”"], a:1 },
+  pearl:"Rode, a jovem que atendeu a porta, ficou tão feliz ao ouvir Pedro que esqueceu de abrir — e o deixou batendo na rua. A Bíblia também tem cenas de comédia." },
+
+{ j:5, t:"Naufrágio e chegada", ref:"Atos 27–28", link:"atos/27", min:14,
+  ctx:"O gran finale: Paulo, prisioneiro, enfrenta 14 dias de tempestade, um naufrágio, uma cobra em Malta — e chega a Roma pregando sem impedimento.",
+  foco:"Repare como o prisioneiro vira o líder de fato do navio: em crise, autoridade real aparece, com ou sem cargo.",
+  reflex:"Atos termina “em aberto”, com a mensagem ainda se espalhando. Chegando ao fim da trilha: o que dessa leitura de 3 meses você quer levar adiante?",
+  quiz:{ q:"Quantas pessoas estavam no navio, e quantas se salvaram?", o:["276, e todas se salvaram","150, e metade se salvou","300, e apenas Paulo se salvou"], a:0 },
+  pearl:"A descrição da navegação e do naufrágio em Atos 27 é tão precisa que é usada por historiadores como uma das melhores fontes sobre navegação romana do século I. Você chegou ao fim da trilha — 60 etapas. Poucos chegam até aqui." }
+];
+
+/* =========================================================
+   NÍVEIS E CONQUISTAS
+   ========================================================= */
+const LEVELS = [
+  { xp:0,    t:"Semente" },
+  { xp:120,  t:"Caminhante" },
+  { xp:300,  t:"Peregrino" },
+  { xp:550,  t:"Escriba" },
+  { xp:850,  t:"Contador de Histórias" },
+  { xp:1200, t:"Guardião da Chama" },
+  { xp:1650, t:"Sábio do Caminho" },
+  { xp:2150, t:"Luz no Caminho" }
+];
+
+const BADGES = [
+  { id:"primeiro", ico:"👣", n:"Primeiro Passo", d:"Conclua sua primeira etapa" },
+  { id:"j0", ico:"🌱", n:"Origens", d:"Complete a jornada de Gênesis" },
+  { id:"j1", ico:"🌊", n:"Libertação", d:"Complete a jornada do Êxodo" },
+  { id:"j2", ico:"🦁", n:"Coragem", d:"Complete Rute, Jonas, Daniel e Ester" },
+  { id:"j3", ico:"👑", n:"Coração de Rei", d:"Complete a saga de Davi" },
+  { id:"j4", ico:"✶", n:"Boa Notícia", d:"Complete o evangelho de Marcos" },
+  { id:"j5", ico:"🔥", n:"Fogo Espalhado", d:"Complete o livro de Atos" },
+  { id:"meio", ico:"⛰️", n:"Metade do Caminho", d:"Conclua 30 das 60 etapas" },
+  { id:"folego", ico:"💨", n:"Fôlego", d:"3 etapas num mesmo dia" },
+  { id:"semana", ico:"🕯️", n:"Semana Acesa", d:"5 etapas em 7 dias" },
+  { id:"recomeco", ico:"🌅", n:"Recomeço", d:"Volte após 3+ dias de pausa" },
+  { id:"completo", ico:"🏆", n:"Caminho Completo", d:"Conclua as 60 etapas" }
+];
+
+/* =========================================================
+   ESTADO E ARMAZENAMENTO
+   ========================================================= */
+const KEY = "lampada-v1";
+let state = null;
+let usingMemory = false;
+let saveTimer = null;
+
+function freshState(){
+  return { start:null, xp:0, done:{}, quiz:{}, notes:{}, badges:{}, onb:false };
+}
+/* Grava em TODAS as camadas disponíveis. localStorage é a mais confiável
+   quando o arquivo é aberto direto no navegador (file:// ou hospedado). */
+function lsSet(v){ try{ localStorage.setItem(KEY, v); return true; }catch(e){ return false; } }
+function lsGet(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
+function lsDel(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+
+async function persist(){
+  const raw = JSON.stringify(state);
+  const okLocal = lsSet(raw);
+  let okRemote = false;
+  try{
+    if(window.storage && window.storage.set){
+      const r = await window.storage.set(KEY, raw);
+      okRemote = !!r;
+    }
+  }catch(e){ okRemote = false; }
+  usingMemory = !okLocal && !okRemote;
+  cloudPushSoon();
+  renderSaveState();
+}
+function persistSoon(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persist, 500);
+}
+async function restore(){
+  let local = null, remote = null;
+  const raw = lsGet();
+  if(raw){ try{ local = JSON.parse(raw); }catch(e){} }
+  try{
+    if(window.storage && window.storage.get){
+      const r = await window.storage.get(KEY);
+      if(r && r.value) remote = JSON.parse(r.value);
+    }
+  }catch(e){}
+  if(local && remote){
+    // fica com o mais avançado, para nunca perder progresso
+    return (Object.keys(remote.done||{}).length > Object.keys(local.done||{}).length) ? remote : local;
+  }
+  return local || remote;
+}
+/* =========================================================
+   SINCRONIZAÇÃO — CAMADA DE ADAPTADORES
+   O localStorage é sempre a fonte primária. Um adaptador é só
+   um espelho remoto: se a rede cair, o app continua igual e a
+   fila pendente é enviada na próxima oportunidade.
+   Interface: { id, label, fields, pushDelay, validate(), get(), put(state, opts) }
+   ========================================================= */
+const SKEY = "lampada-sync";
+/* all: config de cada backend, guardada separadamente para que trocar de
+   backend e voltar não apague o que já foi preenchido */
+let sync = { backend:"local", all:{} };
+let cloudTimer = null;
+let retryTimer = null;
+/* sincronizado | salvando | offline (fila pendente) | config (erro de configuração) | off */
+let cloudStatus = "off";
+let cloudErr = "";
+let pendingPush = false;
+let pushing = false;
+
+/* ---------- UTF-8 <-> base64 (btoa puro quebra com acentos) ---------- */
+function b64encode(str){
+  const bytes = new TextEncoder().encode(str);
+  if(bytes.length < 8192) return btoa(String.fromCharCode(...bytes));
+  // mesma semântica, em blocos, para não estourar a pilha em estados grandes
+  let bin = "";
+  for(let i=0;i<bytes.length;i+=8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i+8192));
+  return btoa(bin);
+}
+function b64decode(b64){
+  return new TextDecoder().decode(Uint8Array.from(atob(String(b64).replace(/\s/g,"")), c => c.charCodeAt(0)));
+}
+
+/* ---------- config persistida ---------- */
+function loadSync(){
+  try{
+    const r = localStorage.getItem(SKEY);
+    if(!r) return;
+    const d = JSON.parse(r);
+    if(d && d.backend && d.all){ sync = { backend:d.backend, all:d.all }; return; }
+    // formato antigo: { url, key, code } — era sempre Supabase
+    if(d && (d.url || d.key || d.code)){
+      sync = { backend: (d.url && d.key && d.code) ? "supabase" : "local",
+               all: { supabase: { url:d.url||"", key:d.key||"", code:d.code||"" } } };
+    }
+  }catch(e){}
+}
+function saveSync(){
+  try{ localStorage.setItem(SKEY, JSON.stringify(sync)); }catch(e){}
+}
+const cfg = k => {
+  const c = sync.all[sync.backend] || {};
+  return String(c[k] == null ? "" : c[k]).trim();
+};
+function cfgOr(k, dflt){ return cfg(k) || dflt; }
+
+/* Mensagem de erro real da API, nunca um genérico */
+async function apiError(r){
+  let detail = "";
+  try{
+    const txt = await r.text();
+    try{
+      const j = JSON.parse(txt);
+      detail = j.message || j.error_description || j.error || j.msg || txt;
+    }catch(e){ detail = txt; }
+  }catch(e){}
+  detail = String(detail || "").trim().slice(0, 300);
+  return new Error("HTTP " + r.status + (detail ? " — " + detail : ""));
+}
+
+/* =========================================================
+   ADAPTADOR 1 — LOCAL (padrão, sem rede)
+   ========================================================= */
+const localAdapter = {
+  id:"local", label:"Só neste aparelho (sem nuvem)", fields:[], pushDelay:0,
+  note:"Nada sai do navegador. Use “Baixar backup” para levar o progresso para outro aparelho.",
+  validate(){ return ""; },
+  async get(){ return null; },
+  async put(){ return null; }
+};
+
+/* =========================================================
+   ADAPTADOR 2 — GITHUB (progresso.json num repositório privado)
+   ========================================================= */
+let ghSha = null;
+
+const githubAdapter = {
+  id:"github", label:"GitHub (repositório privado)",
+  pushDelay: 8000, // cada gravação vira um commit — 500ms encheria o histórico de lixo
+  fields:[
+    { k:"owner",  id:"syncOwner",  label:"Usuário ou organização", ph:"seu-usuario" },
+    { k:"repo",   id:"syncRepo",   label:"Repositório",            ph:"lampada-progresso" },
+    { k:"path",   id:"syncPath",   label:"Arquivo",                ph:"progresso.json", dflt:"progresso.json" },
+    { k:"branch", id:"syncBranch", label:"Branch",                 ph:"main",           dflt:"main" },
+    { k:"token",  id:"syncToken",  label:"Token de acesso",        ph:"github_pat_…",   type:"password" }
+  ],
+  note:"O token fica salvo <b>neste navegador</b>. Use um token <b>fine-grained</b> limitado a um único repositório, com permissão apenas de <b>contents: write</b>.",
+  validate(){
+    if(!cfg("owner")) return "Informe o usuário ou organização do GitHub.";
+    if(!cfg("repo"))  return "Informe o nome do repositório.";
+    if(!cfg("token")) return "Informe o token de acesso do GitHub.";
+    return "";
+  },
+  url(){
+    const path = cfgOr("path","progresso.json").replace(/^\/+/,"")
+      .split("/").map(encodeURIComponent).join("/");
+    return "https://api.github.com/repos/" + encodeURIComponent(cfg("owner")) +
+           "/" + encodeURIComponent(cfg("repo")) + "/contents/" + path;
+  },
+  headers(){
+    return {
+      "Authorization": "Bearer " + cfg("token"),
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Cache-Control": "no-cache"
+    };
+  },
+  async get(){
+    // sempre pela API: a URL do GitHub Pages passa por CDN e devolveria dados velhos
+    const u = this.url() + "?ref=" + encodeURIComponent(cfgOr("branch","main")) + "&_=" + Date.now();
+    const r = await fetch(u, { headers: this.headers(), cache:"no-store" });
+    if(r.status === 404){ ghSha = null; return null; } // ainda não existe: estado inicial válido
+    if(!r.ok) throw await apiError(r);
+    const j = await r.json();
+    ghSha = j.sha || null;
+    if(!j.content) return null;
+    try{ return JSON.parse(b64decode(j.content)); }
+    catch(e){ throw new Error("O arquivo " + cfgOr("path","progresso.json") + " existe mas não é um JSON válido."); }
+  },
+  async write(st, opts){
+    const json = JSON.stringify(st);
+    const body = {
+      message: "progresso: " + Object.keys(st.done||{}).length + "/" + ETAPAS.length + " etapas",
+      content: b64encode(json),
+      branch: cfgOr("branch","main")
+    };
+    if(ghSha) body.sha = ghSha; // obrigatório quando o arquivo já existe
+    const init = {
+      method:"PUT",
+      headers: Object.assign(this.headers(), { "Content-Type":"application/json" }),
+      body: JSON.stringify(body)
+    };
+    if(opts && opts.keepalive) init.keepalive = true;
+    const r = await fetch(this.url(), init);
+    if(r.ok){
+      const j = await r.json().catch(()=>null);
+      ghSha = (j && j.content && j.content.sha) || null;
+      return true;
+    }
+    if(r.status === 409 || r.status === 422) return false; // conflito de sha
+    throw await apiError(r);
+  },
+  async put(st, opts){
+    // ao sair da página não dá tempo de fazer o GET: manda direto com o sha
+    // conhecido. Se o remoto mudou, o sha não bate e o PUT falha — nunca
+    // sobrescreve às cegas; a fila fica pendente para a próxima abertura.
+    if(opts && opts.keepalive && ghSha){
+      await this.write(st, opts);
+      return null;
+    }
+    let remote = await this.get();
+    let merged = mergeStates(st, remote);
+    if(await this.write(merged, opts)) return merged;
+    // conflito: refaz o GET com o remoto fresco, remescla e tenta uma única vez mais
+    remote = await this.get();
+    merged = mergeStates(st, remote);
+    if(await this.write(merged, opts)) return merged;
+    throw new Error("Conflito no GitHub: o arquivo mudou durante a gravação. Nada foi sobrescrito — tente de novo.");
+  }
+};
+
+/* =========================================================
+   ADAPTADOR 3 — SUPABASE (o que já existia, agora encapsulado)
+   ========================================================= */
+const supabaseAdapter = {
+  id:"supabase", label:"Supabase", pushDelay: 1200,
+  fields:[
+    { k:"url",  id:"syncUrl",  label:"URL do projeto",   ph:"https://xxxxx.supabase.co" },
+    { k:"key",  id:"syncKey",  label:"Chave anon",       ph:"chave anon (publishable)", type:"password" },
+    { k:"code", id:"syncCode", label:"Código pessoal",   ph:"ex: allan-7fk29p" }
+  ],
+  note:"Precisa de uma tabela <b>lampada</b> com as colunas <b>id</b> (texto, chave) e <b>data</b> (jsonb). A chave fica salva neste navegador.",
+  validate(){
+    if(!cfg("url"))  return "Informe a URL do projeto Supabase.";
+    if(!cfg("key"))  return "Informe a chave anon.";
+    if(!cfg("code")) return "Informe o seu código pessoal.";
+    return "";
+  },
+  headers(){
+    return { "apikey": cfg("key"), "Authorization": "Bearer " + cfg("key"),
+             "Content-Type": "application/json", "Cache-Control": "no-cache" };
+  },
+  async get(){
+    const u = cfg("url").replace(/\/+$/,"") + "/rest/v1/lampada?id=eq." +
+              encodeURIComponent(cfg("code")) + "&select=data";
+    const r = await fetch(u, { headers: this.headers(), cache:"no-store" });
+    if(!r.ok) throw await apiError(r);
+    const rows = await r.json();
+    return (rows && rows[0] && rows[0].data) ? rows[0].data : null;
+  },
+  async put(st, opts){
+    const merged = mergeStates(st, await this.get());
+    const u = cfg("url").replace(/\/+$/,"") + "/rest/v1/lampada";
+    const h = Object.assign(this.headers(), { "Prefer": "resolution=merge-duplicates,return=minimal" });
+    const init = { method:"POST", headers:h, body: JSON.stringify([{ id: cfg("code"), data: merged }]) };
+    if(opts && opts.keepalive) init.keepalive = true;
+    const r = await fetch(u, init);
+    if(!r.ok) throw await apiError(r);
+    return merged;
+  }
+};
+
+/* =========================================================
+   ADAPTADOR 4 — WORKER (endpoint HTTP genérico: GET lê, PUT grava)
+   ========================================================= */
+const workerAdapter = {
+  id:"worker", label:"Endpoint próprio (Worker/HTTP)", pushDelay: 1200,
+  fields:[
+    { k:"url",   id:"syncWorkerUrl",   label:"Endereço",          ph:"https://meu-worker.exemplo.dev/progresso" },
+    { k:"token", id:"syncWorkerToken", label:"Token (opcional)",  ph:"deixe vazio se não usar", type:"password" }
+  ],
+  note:"O endereço precisa responder <b>GET</b> devolvendo o estado em JSON e aceitar <b>PUT</b> gravando o corpo enviado.",
+  validate(){
+    if(!cfg("url")) return "Informe o endereço do endpoint.";
+    if(!/^https?:\/\//i.test(cfg("url"))) return "O endereço precisa começar com http:// ou https://";
+    return "";
+  },
+  headers(){
+    const h = { "Content-Type":"application/json", "Cache-Control":"no-cache" };
+    if(cfg("token")) h["Authorization"] = "Bearer " + cfg("token");
+    return h;
+  },
+  async get(){
+    const r = await fetch(cfg("url"), { headers: this.headers(), cache:"no-store" });
+    if(r.status === 404) return null; // ainda não existe
+    if(!r.ok) throw await apiError(r);
+    const txt = (await r.text()).trim();
+    if(!txt) return null;
+    try{ const d = JSON.parse(txt); return (d && typeof d === "object" && "done" in d) ? d : null; }
+    catch(e){ throw new Error("O endpoint devolveu algo que não é JSON."); }
+  },
+  async put(st, opts){
+    const merged = mergeStates(st, await this.get());
+    const init = { method:"PUT", headers: this.headers(), body: JSON.stringify(merged) };
+    if(opts && opts.keepalive) init.keepalive = true;
+    const r = await fetch(cfg("url"), init);
+    if(!r.ok) throw await apiError(r);
+    return merged;
+  }
+};
+
+const ADAPTERS = {};
+[localAdapter, githubAdapter, supabaseAdapter, workerAdapter].forEach(a => { ADAPTERS[a.id] = a; });
+
+const adapter = () => ADAPTERS[sync.backend] || localAdapter;
+/* sincronização ativa = backend remoto escolhido E configuração completa */
+const syncOn = () => adapter().id !== "local" && !adapter().validate();
+
+function setCloudStatus(s, msg){
+  cloudStatus = s;
+  cloudErr = msg || "";
+  renderSaveState();
+}
+
+/* Envia a fila pendente. Nunca lança: falha de rede não pode travar a interface. */
+async function cloudFlush(keepalive){
+  if(!syncOn() || !pendingPush || pushing) return;
+  clearTimeout(cloudTimer); clearTimeout(retryTimer);
+  pushing = true;
+  try{
+    const merged = await adapter().put(state, { keepalive: !!keepalive });
+    if(merged){
+      // o remoto pode trazer etapas feitas no outro aparelho
+      state = mergeStates(state, merged);
+      lsSet(JSON.stringify(state));
+      renderAll();
+    }
+    pendingPush = false;
+    setCloudStatus("sincronizado");
+  }catch(e){
+    setCloudStatus("offline", e.message);
+    // continua na fila: tenta de novo sozinho, sem incomodar o usuário
+    retryTimer = setTimeout(() => cloudFlush(false), 30000);
+  }finally{
+    pushing = false;
+  }
+}
+
+function cloudPushSoon(){
+  const a = adapter();
+  if(a.id === "local"){ cloudStatus = "off"; cloudErr = ""; return; }
+  const bad = a.validate();
+  if(bad){ setCloudStatus("config", bad); return; }
+  pendingPush = true;
+  clearTimeout(cloudTimer);
+  setCloudStatus("salvando");
+  cloudTimer = setTimeout(() => cloudFlush(false), a.pushDelay);
+}
+
+/* Nunca perde progresso: une os dois lados em vez de escolher um */
+function mergeStates(a, b){
+  if(!a) return b; if(!b) return a;
+  const out = freshState();
+  out.start = [a.start, b.start].filter(Boolean).sort()[0] || null;
+  out.xp = Math.max(a.xp||0, b.xp||0);
+  out.onb = !!(a.onb || b.onb);
+  ["done","quiz","badges"].forEach(k => { out[k] = Object.assign({}, b[k]||{}, a[k]||{}); });
+  // anotações: mantém a versão mais longa de cada etapa
+  const notes = {};
+  const keys = new Set([...Object.keys(a.notes||{}), ...Object.keys(b.notes||{})]);
+  keys.forEach(k => {
+    const x = (a.notes||{})[k] || "", y = (b.notes||{})[k] || "";
+    notes[k] = x.length >= y.length ? x : y;
+  });
+  out.notes = notes;
+  return out;
+}
+
+/* Puxa o remoto, mescla, reenvia e re-renderiza. */
+async function pullFromCloud(silent){
+  const a = adapter();
+  if(a.id === "local") return;
+  const bad = a.validate();
+  if(bad){
+    setCloudStatus("config", bad);
+    if(!silent) alert("Falta preencher: " + bad);
+    return;
+  }
+  setCloudStatus("salvando");
+  try{
+    const remote = await a.get();
+    if(remote){
+      state = mergeStates(state, remote);
+      lsSet(JSON.stringify(state));
+      renderAll();
+    }
+    const merged = await a.put(state, {});
+    if(merged){
+      state = mergeStates(state, merged);
+      lsSet(JSON.stringify(state));
+      renderAll();
+    }
+    pendingPush = false;
+    setCloudStatus("sincronizado");
+    if(!silent) alert("Sincronizado. " + Object.keys(state.done).length + " etapas concluídas.");
+  }catch(e){
+    // fica na fila: o local está seguro e o envio é retomado sozinho
+    pendingPush = true;
+    clearTimeout(retryTimer);
+    retryTimer = setTimeout(() => cloudFlush(false), 30000);
+    setCloudStatus("offline", e.message);
+    if(!silent) alert("Não consegui conectar:\n\n" + e.message + "\n\nO progresso continua salvo neste aparelho e será enviado quando a conexão voltar.");
+  }
+}
+
+/* ---------- painel de configuração ---------- */
+function renderSyncFields(){
+  const a = adapter();
+  const box = document.getElementById("syncFields");
+  const note = document.getElementById("syncNote");
+  if(!box) return;
+  box.innerHTML = a.fields.map(f =>
+    '<label class="sync-label" for="'+f.id+'">'+f.label+'</label>'+
+    '<input class="sync-input" id="'+f.id+'" type="'+(f.type||"text")+'" placeholder="'+f.ph+'" autocomplete="off" spellcheck="false">'
+  ).join("");
+  a.fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if(el) el.value = cfg(f.k) || f.dflt || "";
+  });
+  if(note) note.innerHTML = a.note || "";
+}
+function readSyncFields(){
+  const a = adapter();
+  const cfgOut = {};
+  a.fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    cfgOut[f.k] = (el ? el.value.trim() : "") || f.dflt || "";
+  });
+  sync.all[a.id] = cfgOut;
+}
+function syncResult(msg, ok){
+  const el = document.getElementById("syncResult");
+  if(!el) return;
+  el.className = "sync-result " + (ok ? "ok" : "bad");
+  el.textContent = msg;
+}
+
+function openSyncPanel(){
+  loadSync();
+  const el = document.getElementById("syncPanel");
+  el.style.display = el.style.display === "block" ? "none" : "block";
+  const sel = document.getElementById("syncBackend");
+  sel.innerHTML = Object.keys(ADAPTERS)
+    .map(id => '<option value="'+id+'">'+ADAPTERS[id].label+'</option>').join("");
+  sel.value = adapter().id;
+  renderSyncFields();
+  syncResult("", true);
+}
+async function saveSyncConfig(){
+  readSyncFields();
+  saveSync();
+  if(adapter().id === "local"){
+    cloudStatus = "off"; cloudErr = ""; pendingPush = false;
+    clearTimeout(cloudTimer); clearTimeout(retryTimer);
+    renderSaveState();
+    syncResult("Sincronização desligada. O progresso fica só neste aparelho.", true);
+    return;
+  }
+  ghSha = null;
+  syncResult("Conectando…", true);
+  await pullFromCloud(true);
+  syncResult(cloudStatus === "sincronizado"
+    ? "Conectado. " + Object.keys(state.done).length + " etapas concluídas."
+    : "Não consegui conectar: " + cloudErr, cloudStatus === "sincronizado");
+}
+
+/* Round-trip completo: lê, mescla, grava e relê para conferir. */
+async function testSyncConnection(){
+  readSyncFields();
+  saveSync();
+  const a = adapter();
+  if(a.id === "local"){ syncResult("Modo local: nada é enviado para a rede.", true); return; }
+  const bad = a.validate();
+  if(bad){ setCloudStatus("config", bad); syncResult("Falta preencher: " + bad, false); return; }
+  syncResult("Testando…", true);
+  try{
+    const before = await a.get();
+    const merged = await a.put(state, {});
+    if(merged){ state = mergeStates(state, merged); lsSet(JSON.stringify(state)); renderAll(); }
+    const after = await a.get();
+    const n = after ? Object.keys(after.done || {}).length : 0;
+    pendingPush = false;
+    setCloudStatus("sincronizado");
+    syncResult("✓ Leitura e gravação funcionando. " +
+      (before ? "Arquivo já existia. " : "Arquivo criado agora. ") +
+      "O remoto tem " + n + " etapas concluídas.", true);
+  }catch(e){
+    setCloudStatus("offline", e.message);
+    syncResult("✗ " + e.message, false);
+  }
+}
+
+function renderSaveState(){
+  const el = document.getElementById("saveState");
+  if(!el) return;
+  if(usingMemory){
+    el.className = "save-warn";
+    el.innerHTML = "⚠️ Este navegador está bloqueando o salvamento automático. Use <b>Baixar backup</b> antes de fechar a página.";
+    return;
+  }
+  const base = "✓ Progresso salvo neste navegador";
+  if(cloudStatus === "config"){
+    el.className = "save-err";
+    el.textContent = base + " · ⚙️ sincronização incompleta: " + cloudErr;
+  }else if(cloudStatus === "offline"){
+    el.className = "save-err";
+    el.textContent = base + " · 📴 fila pendente (o local está seguro) — " + cloudErr;
+  }else{
+    el.className = "save-ok";
+    el.textContent = base + (
+      cloudStatus === "salvando"     ? " · ☁️ salvando…" :
+      cloudStatus === "sincronizado" ? " · ☁️ sincronizado (" + adapter().label + ")" : "");
+  }
+}
+
+/* Backup manual — funciona em qualquer situação */
+function exportBackup(){
+  const blob = new Blob([JSON.stringify(state)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "lampada-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function importBackup(){
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "application/json,.json";
+  inp.onchange = () => {
+    const f = inp.files && inp.files[0];
+    if(!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try{
+        const d = JSON.parse(rd.result);
+        if(!d || typeof d !== "object" || !("done" in d)) throw new Error("formato");
+        state = Object.assign(freshState(), d);
+        persist();
+        renderAllSafe();
+        alert("Progresso restaurado: " + Object.keys(state.done).length + " etapas concluídas.");
+      }catch(e){ alert("Não consegui ler esse arquivo de backup."); }
+    };
+    rd.readAsText(f);
+  };
+  inp.click();
+}
+
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const DAY = 86400000;
+const doneCount = () => Object.keys(state.done).length;
+const doneList = () => Object.values(state.done).map(d => new Date(d));
+const sameDay = (a,b) => a.toDateString() === b.toDateString();
+
+function compsLastDays(n){
+  const cut = Date.now() - n*DAY;
+  return doneList().filter(d => d.getTime() >= cut).length;
+}
+function lastCompletion(){
+  const l = doneList().sort((a,b)=>b-a);
+  return l.length ? l[0] : null;
+}
+function levelIdx(xp){
+  let i = 0;
+  LEVELS.forEach((l,k)=>{ if(xp >= l.xp) i = k; });
+  return i;
+}
+function nextEtapaIdx(){
+  for(let i=0;i<ETAPAS.length;i++) if(!state.done[i]) return i;
+  return -1;
+}
+function fmtDate(d){
+  return d.toLocaleDateString("pt-BR", { day:"numeric", month:"long" });
+}
+function esc(s){ return s; }
+
+/* =========================================================
+   RENDER GERAL
+   ========================================================= */
+function renderAll(){
+  renderFlame();
+  renderLevel();
+  renderCompass();
+  renderContinue();
+  renderTrail();
+  renderBadges();
+  renderPearls();
+}
+
+function renderFlame(){
+  const c7 = compsLastDays(7);
+  let label, scale, glow;
+  if(c7 === 0){ label = "<b>Brasas</b> — uma etapa reacende sua chama"; scale=.55; glow=.35; }
+  else if(c7 <= 2){ label = "Chama <b>acesa</b> · "+c7+" etapa"+(c7>1?"s":"")+" nos últimos 7 dias"; scale=.78; glow=.7; }
+  else if(c7 <= 4){ label = "Chama <b>forte</b> · "+c7+" etapas nos últimos 7 dias"; scale=.95; glow=1; }
+  else { label = "Chama <b>radiante</b> · "+c7+" etapas nos últimos 7 dias"; scale=1.12; glow=1.25; }
+  $("flameSvg").style.transform = "scale("+scale+")";
+  $("flameGlow").style.transform = "scale("+glow+")";
+  $("flameGlow").style.opacity = Math.min(1, .3 + c7*.15);
+  $("flameLabel").innerHTML = label;
+  const dots = [];
+  for(let i=0;i<5;i++) dots.push('<span class="'+(i < Math.min(c7,5) ? "on":"")+'"></span>');
+  $("weekDots").innerHTML = dots.join("");
+}
+
+function renderLevel(){
+  const li = levelIdx(state.xp);
+  const cur = LEVELS[li], nxt = LEVELS[li+1];
+  $("levelTitle").innerHTML = cur.t + '<small>nível '+(li+1)+' de '+LEVELS.length+'</small>';
+  $("xpNum").textContent = state.xp + " XP";
+  if(nxt){
+    const pct = Math.round(100 * (state.xp - cur.xp) / (nxt.xp - cur.xp));
+    $("xpFill").style.width = pct + "%";
+    $("xpNext").textContent = "Faltam " + (nxt.xp - state.xp) + " XP para se tornar " + nxt.t;
+  } else {
+    $("xpFill").style.width = "100%";
+    $("xpNext").textContent = "Nível máximo alcançado. Você é luz no caminho.";
+  }
+}
+
+function renderCompass(){
+  const total = ETAPAS.length;
+  const dn = doneCount();
+  const start = new Date(state.start);
+  const days = Math.max(1, Math.floor((Date.now() - start.getTime())/DAY) + 1);
+  const left = Math.max(0, 90 - days);
+  const expected = Math.min(total, Math.ceil(total * Math.min(days,90) / 90));
+  const delta = dn - expected;
+
+  $("statDays").textContent = Math.min(days,90) + (days>90 ? "+" : "");
+  $("statDone").textContent = dn;
+  $("statLeft").textContent = left;
+
+  const st = $("compassStatus"), msg = $("compassMsg");
+  if(dn >= total){
+    st.textContent = "Trilha concluída ✦"; st.className = "compass-status ahead";
+    msg.textContent = "Você percorreu as 60 etapas. O trimestre cumpriu sua função: agora o hábito é seu.";
+  } else if(days > 90){
+    st.textContent = "Trimestre encerrado — caminho aberto"; st.className = "compass-status ok";
+    msg.textContent = "Os 90 dias passaram, mas nada se perde: continue de onde parou, no seu passo.";
+  } else if(delta >= 2){
+    st.textContent = "Adiantado ✨"; st.className = "compass-status ahead";
+    msg.textContent = "Você está " + delta + " etapas à frente do ritmo de 90 dias. Aproveite para ler com ainda mais calma e profundidade.";
+  } else if(delta >= -1){
+    st.textContent = "No ritmo, firme"; st.className = "compass-status ok";
+    msg.textContent = "Seu passo atual fecha a trilha dentro do trimestre. Constância vale mais que intensidade.";
+  } else {
+    st.textContent = "Hora de avançar"; st.className = "compass-status behind";
+    msg.textContent = "Para fechar em 90 dias, o ritmo pede " + Math.abs(delta) + " etapa" + (Math.abs(delta)>1?"s":"") + " a mais. Uma hoje já muda o quadro — a maioria leva só 10–15 minutos.";
+  }
+
+  // previsão de chegada com base no ritmo real das últimas 2 semanas
+  if(dn > 0 && dn < total && days <= 120){
+    const c14 = compsLastDays(14);
+    if(c14 > 0){
+      const pace = c14 / 14;
+      const est = new Date(Date.now() + ((total - dn) / pace) * DAY);
+      msg.textContent += " No seu ritmo das últimas 2 semanas, você conclui a trilha por volta de " + fmtDate(est) + ".";
+    } else {
+      msg.textContent += " Sua chama está em brasas — uma única etapa hoje já reescreve essa previsão.";
+    }
+  }
+
+  // marco próximo (efeito de proximidade da meta)
+  const ni = nextEtapaIdx();
+  const mEl = $("milestone");
+  if(ni === -1){
+    mEl.innerHTML = "🏆 <b>Caminho Completo.</b> Todas as pérolas encontradas, todas as histórias lidas.";
+  } else {
+    const j = ETAPAS[ni].j;
+    const inJ = ETAPAS.filter(e => e.j === j).length;
+    const doneJ = ETAPAS.filter((e,i) => e.j === j && state.done[i]).length;
+    const restJ = inJ - doneJ;
+    const li = levelIdx(state.xp);
+    const nxt = LEVELS[li+1];
+    let m = "Faltam <b>" + restJ + " etapa" + (restJ>1?"s":"") + "</b> para concluir a jornada “" + JORNADAS[j].n + "”";
+    if(nxt) m += " — e <b>" + (nxt.xp - state.xp) + " XP</b> para virar " + nxt.t;
+    $("milestone").innerHTML = "🎯 " + m + ".";
+  }
+}
+
+function renderContinue(){
+  const ni = nextEtapaIdx();
+  const c = $("continueCard");
+  if(ni === -1){
+    c.innerHTML = '<div class="continue-eyebrow">Fim da trilha</div>'+
+      '<div class="continue-title">Você completou o caminho ✦</div>'+
+      '<div class="continue-meta">60 etapas, 6 jornadas, 3 meses de histórias. Releia suas pérolas e anotações abaixo.</div>';
+    c.onclick = null;
+    return;
+  }
+  const e = ETAPAS[ni];
+  const isFirst = doneCount() === 0;
+  c.innerHTML =
+    '<div class="continue-eyebrow">'+(isFirst ? "Comece aqui" : "Continue de onde parou")+'</div>'+
+    '<div class="continue-title">'+e.t+'</div>'+
+    '<div class="continue-meta">'+e.ref+' · ~'+e.min+' min · Jornada '+(e.j+1)+': '+JORNADAS[e.j].n+'</div>'+
+    '<button class="continue-btn">'+(isFirst ? "Acender a primeira etapa →" : "Abrir etapa →")+'</button>';
+  c.onclick = () => openEtapa(ni);
+}
+
+function renderTrail(){
+  const ni = nextEtapaIdx();
+  const activeJ = ni === -1 ? -1 : ETAPAS[ni].j;
+  let html = "";
+  JORNADAS.forEach((j, ji) => {
+    const idxs = ETAPAS.map((e,i)=>({e,i})).filter(x => x.e.j === ji);
+    const doneJ = idxs.filter(x => state.done[x.i]).length;
+    const allDone = doneJ === idxs.length;
+    const open = openJornadas.has(ji);
+    html += '<div class="jornada '+(allDone?"done ":"")+(ji===activeJ?"active ":"")+(open?"open":"")+'" id="j'+ji+'">';
+    html += '<div class="jornada-head" onclick="toggleJ('+ji+')">'+
+      '<div class="jornada-num">'+(allDone?"✓":(ji+1))+'</div>'+
+      '<div class="jornada-info"><div class="jornada-name">'+j.n+'</div>'+
+      '<div class="jornada-sub">'+j.livro+' — '+j.d+'</div></div>'+
+      '<div class="jornada-prog">'+doneJ+'/'+idxs.length+'</div>'+
+      '<div class="chev">▶</div></div>';
+    html += '<div class="etapas">';
+    idxs.forEach(({e,i}) => {
+      const done = !!state.done[i];
+      const isNext = i === ni;
+      const locked = !done && !isNext;
+      html += '<div class="etapa '+(done?"done":"")+(isNext?" next":"")+(locked?" locked":"")+'" '+
+        (locked ? 'title="Conclua a etapa anterior para acender esta"' : 'onclick="openEtapa('+i+')"')+'>'+
+        '<div class="et-title">'+(locked ? "🔒 " : "")+e.t+(done?' <span class="badge-done">✓ concluída</span>':"")+'</div>'+
+        '<div class="et-ref">'+e.ref+'</div>'+
+        '<div class="et-meta">~'+e.min+' min de leitura'+(isNext?" · sua próxima etapa":"")+'</div></div>';
+    });
+    html += '</div></div>';
+  });
+  $("trailList").innerHTML = html;
+}
+
+let openJornadas = new Set();
+function toggleJ(ji){
+  if(openJornadas.has(ji)) openJornadas.delete(ji); else openJornadas.add(ji);
+  renderTrail();
+}
+
+function renderBadges(){
+  const earned = Object.keys(state.badges).length;
+  $("badgeSub").textContent = earned + " de " + BADGES.length + " conquistadas";
+  $("badgeGrid").innerHTML = BADGES.map(b =>
+    '<div class="badge '+(state.badges[b.id]?"earned":"")+'">'+
+    '<div class="b-ico">'+b.ico+'</div><div class="b-name">'+b.n+'</div>'+
+    '<div class="b-desc">'+b.d+'</div></div>'
+  ).join("");
+}
+
+function renderPearls(){
+  const ids = Object.keys(state.done).map(Number).sort((a,b)=>a-b);
+  $("pearlCount").textContent = ids.length + " de 60";
+  if(!ids.length){
+    $("pearlList").innerHTML = '<div class="pearl-item" style="color:var(--dim)">Sua primeira pérola aparece ao concluir a primeira etapa.</div>';
+    return;
+  }
+  $("pearlList").innerHTML = ids.map(i =>
+    '<div class="pearl-item"><b>'+ETAPAS[i].ref+'</b> — '+ETAPAS[i].pearl+'</div>'
+  ).join("");
+}
+
+/* =========================================================
+   MODAL DA ETAPA
+   ========================================================= */
+let quizFirstTryOk = {};
+
+function openEtapa(i){
+  const e = ETAPAS[i];
+  const done = !!state.done[i];
+  const s = $("etapaSheet");
+  const answered = state.quiz[i] === true;
+  let html =
+    '<button class="sheet-close" onclick="closeEtapa()" aria-label="Fechar">✕</button>'+
+    '<div class="sheet-eyebrow">Jornada '+(e.j+1)+' · '+JORNADAS[e.j].n+' · Etapa '+(i+1)+' de 60</div>'+
+    '<h2>'+e.t+'</h2>'+
+    '<div class="sheet-ref">'+e.ref+'</div>'+
+    '<div class="sheet-time">~'+e.min+' minutos de leitura</div>'+
+
+    '<div class="block"><h4>Antes de ler</h4><p>'+e.ctx+'</p></div>'+
+    '<div class="block"><h4>🔍 Enquanto lê, procure por…</h4><div class="foco-box">'+e.foco+'</div></div>'+
+    '<a class="read-link" href="'+BIBLE_URL+e.link+'" target="_blank" rel="noopener">📖 Abrir <span>'+e.ref+'</span> na Bíblia Online ↗</a>'+
+
+    '<div class="divider-after">Depois de ler</div>'+
+
+    '<div class="block"><h4>💭 Para pensar (opcional)</h4><p style="margin-bottom:8px">'+e.reflex+'</p>'+
+    '<textarea class="note" id="noteField" placeholder="Anote em uma frase, se quiser. Fica salvo aqui.">'+(state.notes[i]||"")+'</textarea></div>'+
+
+    '<div class="block"><h4>✦ Desafio relâmpago '+(answered ? "· acertado ✓" : "· vale +10 XP")+'</h4>'+
+    '<p style="font-size:15.5px">'+e.quiz.q+'</p><div class="quiz-opts" id="quizOpts">'+
+    e.quiz.o.map((o,k)=>'<button class="quiz-opt'+(answered && k===e.quiz.a ? " right":"")+'" onclick="answerQuiz('+i+','+k+')">'+o+'</button>').join("")+
+    '</div><div class="quiz-feedback" id="quizFb">'+(answered?"Você já acertou esta. ✓":"")+'</div></div>';
+
+  if(done){
+    html += '<div class="done-stamp">✓ Concluída em '+fmtDate(new Date(state.done[i]))+'</div>'+
+      '<div class="pearl-card"><h4>✦ Pérola desta etapa</h4><p>'+e.pearl+'</p></div>'+
+      '<button class="btn-secondary" onclick="closeEtapa()">Fechar</button>';
+  } else {
+    html += '<button class="btn-complete" onclick="completeEtapa('+i+')">Concluir etapa ✦ +25 XP</button>'+
+      '<button class="btn-secondary" onclick="closeEtapa()">Voltar depois — a etapa espera por você</button>';
+  }
+  s.innerHTML = html;
+  $("etapaOverlay").classList.add("show");
+  const nf = $("noteField");
+  if(nf) nf.addEventListener("input", () => { state.notes[i] = nf.value; persistSoon(); });
+}
+
+function closeEtapa(){ $("etapaOverlay").classList.remove("show"); }
+
+function answerQuiz(i, k){
+  const e = ETAPAS[i];
+  const opts = document.querySelectorAll("#quizOpts .quiz-opt");
+  if(state.quiz[i] === true){ return; }
+  if(k === e.quiz.a){
+    opts[k].classList.add("right");
+    if(quizFirstTryOk[i] !== false) quizFirstTryOk[i] = true;
+    state.quiz[i] = true;
+    $("quizFb").textContent = quizFirstTryOk[i] ? "Isso! +10 XP garantidos na conclusão. ✓" : "Agora sim. ✓";
+    persistSoon();
+  } else {
+    opts[k].classList.add("wrong");
+    quizFirstTryOk[i] = false;
+    $("quizFb").textContent = "Quase — dá uma olhadinha de novo no texto. 😉";
+  }
+}
+
+/* =========================================================
+   CONCLUSÃO, XP, MANÁ E CONQUISTAS
+   ========================================================= */
+function completeEtapa(i){
+  if(state.done[i]) return;
+  const now = new Date();
+  const last = lastCompletion();
+  const gapDays = last ? (now - last) / DAY : 0;
+
+  let gained = 25;
+  const lines = ["+25 XP pela etapa"];
+
+  if(state.quiz[i] === true && quizFirstTryOk[i]){ gained += 10; lines.push("+10 XP · desafio na primeira tentativa"); }
+  else if(state.quiz[i] === true){ gained += 5; lines.push("+5 XP · desafio concluído"); }
+
+  let mana = false;
+  if(Math.random() < 0.15){ gained += 20; mana = true; }
+
+  let comeback = false;
+  if(last && gapDays >= 3){ gained += 30; comeback = true; lines.push("+30 XP · bônus de recomeço 🌅"); }
+
+  const prevLevel = levelIdx(state.xp);
+  state.done[i] = now.toISOString();
+  state.xp += gained;
+  const newLevel = levelIdx(state.xp);
+
+  // conquistas
+  const newB = [];
+  const grant = id => { if(!state.badges[id]){ state.badges[id] = now.toISOString(); newB.push(BADGES.find(b=>b.id===id)); } };
+  if(doneCount() === 1) grant("primeiro");
+  const j = ETAPAS[i].j;
+  if(ETAPAS.every((e,k) => e.j !== j || state.done[k])) grant("j"+j);
+  if(doneCount() >= 30) grant("meio");
+  if(doneList().filter(d => sameDay(d, now)).length >= 3) grant("folego");
+  if(compsLastDays(7) >= 5) grant("semana");
+  if(comeback) grant("recomeco");
+  if(doneCount() === ETAPAS.length) grant("completo");
+
+  persist();
+  confetti();
+
+  // tela de celebração
+  const e = ETAPAS[i];
+  const ni = nextEtapaIdx();
+  let html = '<div class="celebrate">'+
+    '<div class="big">'+(doneCount()===ETAPAS.length ? "🏆" : "🔥")+'</div>'+
+    '<h2>'+(doneCount()===ETAPAS.length ? "Caminho completo!" : "Etapa concluída!")+'</h2>'+
+    '<div class="xp-gain">+'+gained+' XP</div>'+
+    (mana ? '<div class="mana">🍞 Maná do dia! +20 XP surpresa caíram do céu</div>' : "")+
+    (comeback ? '<div class="mana">🌅 Você voltou — e voltar é o que separa quem termina.</div>' : "")+
+    '</div>'+
+    '<div class="pearl-card"><h4>✦ Pérola encontrada</h4><p>'+e.pearl+'</p></div>';
+
+  if(newLevel > prevLevel){
+    html += '<div class="badge-toast">⬆️ <b>Novo nível:</b> você agora é <b>'+LEVELS[newLevel].t+'</b></div>';
+  }
+  newB.forEach(b => {
+    html += '<div class="badge-toast">'+b.ico+' <b>Conquista desbloqueada:</b> '+b.n+' — '+b.d.toLowerCase()+'</div>';
+  });
+
+  if(ni !== -1){
+    html += '<button class="btn-complete" onclick="openEtapa('+ni+')">Próxima: '+ETAPAS[ni].t+' →</button>';
+    html += '<button class="btn-secondary" onclick="closeEtapa(); window.scrollTo({top:0,behavior:\'smooth\'})">Voltar à trilha</button>';
+  } else {
+    html += '<button class="btn-complete" onclick="closeEtapa(); window.scrollTo({top:0,behavior:\'smooth\'})">Ver minha trilha completa ✦</button>';
+  }
+  $("etapaSheet").innerHTML = html;
+  renderAll();
+}
+
+function confetti(){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const colors = ["#FFB13D","#F07E2E","#E9C46A","#F2EBDB","#FFE9B8"];
+  for(let k=0;k<70;k++){
+    const p = document.createElement("div");
+    p.className = "confetti-piece";
+    p.style.left = Math.random()*100 + "vw";
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2 + Math.random()*1.6) + "s";
+    p.style.animationDelay = (Math.random()*0.4) + "s";
+    p.style.transform = "rotate(" + Math.random()*360 + "deg)";
+    p.style.borderRadius = Math.random() > .5 ? "50%" : "2px";
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 4200);
+  }
+}
+
+/* =========================================================
+   ONBOARDING E INÍCIO
+   ========================================================= */
+function showOnboarding(){
+  $("onbSheet").innerHTML =
+    '<div class="sheet-eyebrow">Seu plano de 3 meses</div>'+
+    '<h2>Bem-vindo ao caminho ✦</h2>'+
+    '<div class="onb-item"><div class="ico">🕯️</div><p><b>Sem dias fixos, sem culpa.</b> A trilha avança por etapas, não por datas. Perdeu um dia? Nada quebra — a próxima etapa fica acesa esperando por você.</p></div>'+
+    '<div class="onb-item"><div class="ico">🔥</div><p><b>A chama da semana.</b> Sua meta viva: 5 etapas a cada 7 dias. A chama cresce com seu ritmo e vira brasas se você parar — mas nunca apaga, e voltar rende bônus.</p></div>'+
+    '<div class="onb-item"><div class="ico">🧭</div><p><b>Bússola de 90 dias.</b> Ela mostra se o seu passo fecha a trilha dentro do trimestre e prevê a sua data de chegada. Pressão na medida: real, mas gentil.</p></div>'+
+    '<div class="onb-item"><div class="ico">📖</div><p><b>Leitura leve, estudo de verdade.</b> Só as grandes histórias — zero genealogias. Cada etapa traz contexto antes, um foco durante e uma pergunta depois. 10–15 min.</p></div>'+
+    '<div class="onb-item"><div class="ico">✦</div><p><b>Recompensas.</b> XP, níveis, conquistas, um desafio relâmpago e uma pérola escondida em cada etapa — às vezes, até maná cai do céu.</p></div>'+
+    '<div class="verse">“A tua palavra é lâmpada para os meus pés<br>e luz para o meu caminho.” — Salmo 119.105</div>'+
+    '<button class="btn-complete" onclick="startJourney()">Começar a caminhada · +40 XP de bênção de partida</button>';
+  $("onbOverlay").classList.add("show");
+}
+
+async function startJourney(){
+  state.start = new Date().toISOString();
+  state.xp = 40;
+  state.onb = true;
+  await persist();
+  $("onbOverlay").classList.remove("show");
+  confetti();
+  openJornadas = new Set([0]);
+  renderAll();
+}
+
+async function resetAll(){
+  if(!confirm("Isso apaga todo o progresso, XP, conquistas e anotações. Recomeçar do zero?")) return;
+  state = freshState();
+  lsDel();
+  try{ if(window.storage && window.storage.delete) await window.storage.delete(KEY); }catch(e){}
+  await persist();
+  openJornadas = new Set();
+  renderAll();
+  showOnboarding();
+}
+
+async function init(){
+  loadSync();
+  const saved = await restore();
+  state = saved || freshState();
+  if(!state.onb || !state.start){
+    renderAllSafe();
+    showOnboarding();
+  } else {
+    const ni = nextEtapaIdx();
+    openJornadas = new Set([ni === -1 ? JORNADAS.length-1 : ETAPAS[ni].j]);
+    renderAll();
+  }
+  $("resetBtn").onclick = resetAll;
+  $("exportBtn").onclick = exportBackup;
+  $("importBtn").onclick = importBackup;
+  $("syncBtn").onclick = openSyncPanel;
+  $("syncSaveBtn").onclick = saveSyncConfig;
+  $("syncTestBtn").onclick = testSyncConnection;
+  $("syncBackend").onchange = ev => {
+    readSyncFields();               // não perde o que já foi digitado no backend anterior
+    sync.backend = ev.target.value;
+    ghSha = null;
+    saveSync();
+    renderSyncFields();
+    syncResult(adapter().id === "local"
+      ? "Toque em “Conectar e sincronizar” para desligar a nuvem."
+      : "Preencha os campos e toque em “Conectar e sincronizar”.", true);
+  };
+  await persist();
+  // salva também ao sair da página, por garantia
+  window.addEventListener("beforeunload", () => { try{ lsSet(JSON.stringify(state)); }catch(e){} });
+  document.addEventListener("visibilitychange", () => {
+    if(!document.hidden) return;
+    persist();
+    // dispara o push pendente antes que a aba morra
+    if(pendingPush) cloudFlush(true);
+  });
+  $("etapaOverlay").addEventListener("click", ev => { if(ev.target === $("etapaOverlay")) closeEtapa(); });
+  document.addEventListener("keydown", ev => { if(ev.key === "Escape") closeEtapa(); });
+  $("continueCard").addEventListener("keydown", ev => { if(ev.key === "Enter" && $("continueCard").onclick) $("continueCard").onclick(); });
+  if(syncOn()) pullFromCloud(true);
+}
+
+function renderAllSafe(){
+  // render inicial antes do onboarding (estado vazio, sem data de início)
+  state.start = state.start || new Date().toISOString();
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
