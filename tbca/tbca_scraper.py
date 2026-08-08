@@ -214,12 +214,23 @@ def git_commit(msg):
     if not DO_GIT_COMMIT:
         return
     try:
-        subprocess.run(["git", "add", CHECKPOINT_FILE, CATALOG_FILE], cwd=HERE,
+        subprocess.run(["git", "add", "-f", CHECKPOINT_FILE, CATALOG_FILE], cwd=HERE,
                        check=False, capture_output=True)
         r = subprocess.run(["git", "commit", "-m", msg], cwd=HERE,
                            check=False, capture_output=True, text=True)
         if r.returncode == 0:
             log(f"  git commit ok: {msg}")
+            # push para sobreviver a reset de container (retry/backoff)
+            backoff = 2
+            for attempt in range(1, 5):
+                p = subprocess.run(["git", "push", "origin", GIT_BRANCH], cwd=HERE,
+                                   check=False, capture_output=True, text=True)
+                if p.returncode == 0:
+                    log(f"  git push ok ({len(msg)})")
+                    break
+                log(f"  git push falhou (tent {attempt}): {p.stderr.strip()[:120]}")
+                time.sleep(backoff)
+                backoff *= 2
         else:
             # nada a commitar nao e erro
             if "nothing to commit" not in (r.stdout + r.stderr):
